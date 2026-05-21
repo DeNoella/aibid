@@ -1,0 +1,61 @@
+==========================================================
+EMAIL THREAD SUMMARY — NORTHSTAR HEALTH PROPOSAL FOLLOW-UP
+Thread dates: June 3–17, 2024
+Participants: Morgan Lee (AE), Denise Okafor (NorthStar VP Operations), Gary Tran (NorthStar IT Security)
+==========================================================
+
+--- Email 1 (June 3, Morgan → Denise) ---
+Subject: NorthStar Health — Your Custom Proposal
+
+Hi Denise,
+
+Attached please find the revised proposal incorporating the changes we discussed on our May 30 call:
+- Seat count adjusted to 55 (from 70)
+- AI Insights module included at no additional charge for the first 6 months
+- HIPAA Business Associate Agreement (BAA) attached as Appendix B
+- Implementation support: 20 hours of dedicated onboarding
+
+Total: $162,000/year. Let me know if you'd like to set up a call with our compliance team.
+
+Best,
+Morgan
+
+--- Email 2 (June 7, Gary → Morgan) ---
+Subject: RE: NorthStar Health — Your Custom Proposal
+
+Morgan,
+
+Thank you for the BAA draft. I've reviewed it with our external counsel and we have two redlines:
+1. Section 4.2 — data breach notification window should be 48 hours, not 72 hours.
+2. Section 7.1 — we need to add NorthStar subsidiaries as covered entities under the agreement.
+
+Please confirm these changes can be accommodated before we move to executive sign-off.
+
+Gary Tran | IT Security & Compliance
+NorthStar Health Systems
+
+--- Email 3 (June 10, Morgan → Gary) ---
+Subject: RE: RE: NorthStar Health — Your Custom Proposal
+
+Gary,
+
+Good news — our legal team has approved both redlines. Updated BAA attached. We are good to proceed to executive review.
+
+Denise, happy to join a brief call with your CFO if helpful. Let me know.
+
+Morgan
+
+--- Email 4 (June 17, Denise → Morgan) ---
+Subject: RE: RE: RE: NorthStar Health — Your Custom Proposal
+
+Morgan,
+
+Our CFO has given conditional approval — she wants to confirm budget is available in the FY25 allocation (our fiscal year starts July 1). We expect confirmation by June 28. Assuming budget clears, we would like to execute by July 5.
+
+Thanks for your patience throughout this process. Your team has been very responsive.
+
+Denise
+
+==========================================================
+AE NOTE (Morgan Lee, June 17): Updating deal probability to 75%. Close date set to July 5. Flagging to finance team that PO may come in first week of July.
+==========================================================

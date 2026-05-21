@@ -1,0 +1,42 @@
+==========================================================
+CALL NOTES — QUICKSILVER PAYMENTS NEGOTIATION CHECK-IN
+Date: July 3, 2024
+Participants: Taylor Brooks (AE), Rachel Yuen (QuickSilver CEO), Alistair Vance (QuickSilver CFO)
+Duration: 38 minutes
+==========================================================
+
+This was a scheduled mid-negotiation check-in for the $240K deal (currently at 85% probability in the pipeline).
+
+SUMMARY
+-------
+Rachel opened with positive signals — their board approved the CRM budget last Thursday. Alistair had a few final questions before releasing the PO:
+
+FINANCE QUESTIONS (Alistair):
+Q: "Can we pay annually upfront for a 5% discount rather than monthly?"
+A: Taylor confirmed annual upfront pricing is available and offered 8% discount (instead of 5%) in exchange for a 2-year commitment. Alistair: "Two years is fine. Let me see the revised numbers in writing."
+
+Q: "What happens to our data if we cancel?"
+A: Taylor explained the 90-day offboarding window, full JSON/CSV data export, and data deletion certification process. Alistair seemed satisfied.
+
+Q: "Is there a guaranteed uptime SLA in the contract?"
+A: 99.9% uptime SLA is standard in Enterprise tier. Taylor to include in updated contract language.
+
+EXPANSION POTENTIAL:
+Rachel mentioned they are likely to expand to their Singapore office by early 2025 — potentially 20 additional seats. Taylor flagged this as a potential upsell opportunity in Q1 2025.
+
+RISK FLAGS:
+- None significant. Both Rachel and Alistair are engaged and budget-confirmed.
+
+REVISED DEAL TERMS AGREED IN PRINCIPLE:
+- Annual upfront, 2-year term
+- 8% discount applied → $220,800/year ($441,600 total)
+- Includes Enterprise tier + Salesforce sync + AI Insights module
+- Implementation: 30-hour package
+
+NEXT STEPS:
+- Taylor Brooks: Send revised contract by July 5
+- Taylor Brooks: Update deal value in CRM to $441,600 (2-year)
+- Alistair Vance: PO release by July 10
+- Kick-off call: July 15
+
+NOTE: Original deal value in pipeline ($240K) was based on 1-year. Update CRM accordingly.

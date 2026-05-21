@@ -1,0 +1,52 @@
+deal_name,company,stage,value_usd,close_date,owner,probability
+"Acme Corp Platform Upgrade","Acme Corp","Closed Won",85000,"2024-03-15","Jordan Ellis",100
+"BlueSky SaaS Bundle","BlueSky Analytics","Proposal",42000,"2024-04-30","Morgan Lee",60
+"Cypress Holdings ERP","Cypress Holdings","Negotiation",210000,"2024-05-10","Jordan Ellis",80
+"Dawnlight Media Suite","Dawnlight Media","Discovery",15000,"2024-06-01","Sam Rivera",20
+"EverGreen Retail CRM","EverGreen Retail","Closed Won",67500,"2024-02-28","Taylor Brooks",100
+"FrostByte Cloud Migration","FrostByte Inc","Proposal",130000,"2024-05-22","Morgan Lee",55
+"Galactic Ventures Analytics","Galactic Ventures","Closed Lost",88000,"2024-03-01","Sam Rivera",0
+"HarborView Finance Pack","HarborView Finance","Discovery",22000,"2024-07-15","Jordan Ellis",15
+"IronClad Security Suite","IronClad Security","Negotiation",175000,"2024-06-30","Taylor Brooks",75
+"Jade Path Logistics","Jade Path Co","Proposal",54000,"2024-05-05","Morgan Lee",50
+"Keystone Manufacturing BI","Keystone Mfg","Closed Won",93000,"2024-01-31","Jordan Ellis",100
+"LuminaTech IoT Platform","LuminaTech","Discovery",31000,"2024-08-01","Sam Rivera",10
+"Maple Grove Consulting","Maple Grove LLC","Negotiation",47000,"2024-05-18","Taylor Brooks",70
+"NorthStar Healthcare CRM","NorthStar Health","Proposal",162000,"2024-06-15","Morgan Lee",45
+"OceanWave Shipping","OceanWave Ltd","Closed Won",28500,"2024-02-14","Sam Rivera",100
+"Pinnacle Real Estate Suite","Pinnacle Realty","Discovery",19000,"2024-07-20","Jordan Ellis",25
+"QuickSilver Payments","QuickSilver Inc","Negotiation",240000,"2024-07-01","Taylor Brooks",85
+"RedRock Mining Analytics","RedRock Mining","Proposal",76000,"2024-05-30","Morgan Lee",40
+"Silverline Education Platform","Silverline Edu","Closed Lost",33000,"2024-03-10","Sam Rivera",0
+"TerraFirm AgriTech","TerraFirm LLC","Discovery",12000,"2024-08-15","Jordan Ellis",20
+"Umbra Design Studio","Umbra Creative","Proposal",8500,"2024-06-10","Taylor Brooks",35
+"Vertex Cloud Infrastructure","Vertex Systems","Negotiation",320000,"2024-07-25","Morgan Lee",90
+"Waveform Audio Tech","Waveform Inc","Closed Won",41000,"2024-04-05","Sam Rivera",100
+"Xenon BioSciences","Xenon Bio","Discovery",55000,"2024-09-01","Jordan Ellis",10
+"YellowBrick eCommerce","YellowBrick","Proposal",27000,"2024-06-20","Taylor Brooks",55
+"ZenFlow HR Suite","ZenFlow Inc","Negotiation",98000,"2024-07-10","Morgan Lee",80
+"Astral Gaming Platform","Astral Games","Closed Won",63000,"2024-03-22","Sam Rivera",100
+"BrightPath Nonprofit CRM","BrightPath Org","Proposal",14000,"2024-06-05","Jordan Ellis",50
+"Cobalt Energy Management","Cobalt Energy","Discovery",185000,"2024-08-30","Taylor Brooks",15
+"Delphi Research Tools","Delphi Labs","Negotiation",72000,"2024-07-15","Morgan Lee",65
+"Ember Fashion Analytics","Ember Style Co","Closed Won",36000,"2024-04-18","Sam Rivera",100
+"Falcon Aerospace BI","Falcon Aero","Proposal",425000,"2024-08-01","Jordan Ellis",30
+"Griffin Legal Suite","Griffin & Assoc","Negotiation",89000,"2024-07-20","Taylor Brooks",70
+"Haven Property Mgmt","Haven Homes","Closed Won",52000,"2024-05-01","Morgan Lee",100
+"Indigo Publishing CMS","Indigo Press","Discovery",9500,"2024-09-10","Sam Rivera",20
+"Jasper Oil & Gas Analytics","Jasper Energy","Proposal",310000,"2024-08-15","Jordan Ellis",45
+"Kite Fintech Platform","Kite Financial","Closed Lost",145000,"2024-04-01","Taylor Brooks",0
+"Lotus Wellness CRM","Lotus Health","Negotiation",23000,"2024-07-30","Morgan Lee",75
+"Mercury Telecom Suite","Mercury Comm","Proposal",88000,"2024-08-20","Sam Rivera",40
+"Nova Robotics Platform","Nova Robotics","Discovery",210000,"01/15/2025","Jordan Ellis",10
+"Opal Hospitality Suite","Opal Hotels","Negotiation",67000,"08-10-2024","Taylor Brooks",80
+"Pearl Aquaculture Analytics","Pearl Farms","Proposal",18500,"2024-09-05","Morgan Lee",35
+"Quartz Architecture CRM","Quartz Design","Closed Won",44000,"May 3 2024","Sam Rivera",100
+"Ruby Insurance Platform","Ruby Assurance","Discovery",,,"Jordan Ellis",
+"Sapphire Mining BI","Sapphire Resources","Negotiation",,"2024-10-01","Taylor Brooks",60
+"Titan Automotive Suite","Titan Motors","Proposal",155000,,"Morgan Lee",50
+"Ultraviolet Media CRM","UV Studios","Closed Won",29000,"2024-06-28","Sam Rivera",100
+"Vale Construction Platform","Vale Builders","Discovery",41000,"2024-10-15","Jordan Ellis",15
+"Willow Financial Suite","Willow Capital","Proposal",,"2024-09-20",,45
+"Apex Tech Expansion","Apex Tech","Negotiation",500000,"2024-11-01","Taylor Brooks",95
+"Apex Tech Expansion","Apex Tech","Negotiation",500000,"2024-11-01","Taylor Brooks",95

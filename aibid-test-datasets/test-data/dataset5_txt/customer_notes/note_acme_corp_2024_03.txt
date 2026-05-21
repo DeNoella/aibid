@@ -1,0 +1,33 @@
+==========================================================
+MEETING NOTES — ACME CORP QBR
+Date: March 14, 2024
+Attendees: Jordan Ellis (AE), Priya Malhotra (Acme VP Sales), Tom Grundy (Acme IT), Dana Reeves (AIBID CS)
+Format: Video call via Zoom
+==========================================================
+
+AGENDA
+------
+1. Q1 usage review
+2. Upcoming Q2 expansion discussion
+3. Technical roadmap questions
+4. Renewal timeline
+
+DISCUSSION
+----------
+Priya opened by sharing that their sales team has fully adopted the CRM — 98% login rate among the 45 active users. Pipeline accuracy has improved markedly since onboarding (her words: "we actually trust the numbers now"). The team is running daily standups off the live dashboard.
+
+Tom raised a concern about SSO stability — they had two unexpected logouts last month that disrupted a demo. Jordan logged a bug ticket on the spot (TKT-00092). Dana noted the engineering team shipped a session-timeout fix in the v2.4.1 release last week and offered to verify Tom's environment.
+
+Expansion Discussion:
+Acme is acquiring a smaller firm (cannot disclose name yet) and expects to add 20 additional CRM seats by Q2 end. Priya wants to ensure the imported contacts can be merged without duplicating existing records. Jordan to follow up with implementation guide by EOW.
+
+Renewal: Contract up for renewal June 30. Priya signaled strong intent to renew and upgrade to the Enterprise tier (adds custom reporting + dedicated CSM). Jordan to prepare commercial proposal by April 1.
+
+ACTION ITEMS
+------------
+- Jordan Ellis: Send merger/import guide by March 21
+- Jordan Ellis: Draft Enterprise renewal proposal by April 1
+- Dana Reeves: Verify SSO fix applied to Acme tenant — due March 15
+- Tom Grundy: Confirm user count for Q2 seat expansion
+
+NEXT MEETING: April 11, 2024 (pre-renewal check-in)

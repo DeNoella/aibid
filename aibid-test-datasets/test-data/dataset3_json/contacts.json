@@ -1,0 +1,500 @@
+[
+  {
+    "id": "CNT-1000",
+    "name": "Aria Ashford",
+    "email": "aria.ashford@acmecorp.io",
+    "company": "Acme Corp",
+    "lifecycle_stage": "Lead",
+    "last_contacted": "06/05/2024",
+    "tags": [
+      "smb"
+    ]
+  },
+  {
+    "id": "CNT-1001",
+    "name": "Beau Bellamy",
+    "email": "beau.bellamy@blueskyanalytics.io",
+    "company": "BlueSky Analytics",
+    "lifecycle_stage": "Lead",
+    "last_contacted": "2024-01-17",
+    "tags": [
+      "smb"
+    ]
+  },
+  {
+    "id": "CNT-1002",
+    "name": "Camille Crane",
+    "email": "camille.crane@cypressholdings.io",
+    "company": "Cypress Holdings",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "2024-09-14",
+    "tags": [
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1003",
+    "name": "Dex Delacroix",
+    "email": null,
+    "company": "Dawnlight Media",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "10/19/2024",
+    "tags": [
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1004",
+    "name": "Elena Emerson",
+    "email": "elena.emerson@evergreenretail.io",
+    "company": "EverGreen Retail",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "2024-03-18",
+    "tags": [
+      "demo-requested",
+      "vip",
+      "hot-lead"
+    ]
+  },
+  {
+    "id": "CNT-1005",
+    "name": "Felix Frost",
+    "email": "felix.frost@frostbyteinc.io",
+    "company": "FrostByte Inc",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-06-04T00:00:00Z",
+    "tags": [
+      "trial"
+    ]
+  },
+  {
+    "id": "CNT-1006",
+    "name": "Grace Garland",
+    "email": "grace.garland@galacticventures.io",
+    "company": "Galactic Ventures",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "09/14/2024",
+    "tags": [
+      "trial",
+      "at-risk",
+      "partner",
+      "event-attendee"
+    ]
+  },
+  {
+    "id": "CNT-1007",
+    "name": "Hugo Harlow",
+    "email": "hugo.harlow@harborviewfinance.io",
+    "company": "HarborView Finance",
+    "lifecycle_stage": "SQL",
+    "last_contacted": "2024-04-03T00:00:00Z",
+    "tags": [
+      "demo-requested",
+      "at-risk",
+      "partner"
+    ]
+  },
+  {
+    "id": "CNT-1008",
+    "name": "Iris Ingram",
+    "email": "iris.ingram@ironcladsecurity.io",
+    "company": "IronClad Security",
+    "lifecycle_stage": "Churned",
+    "last_contacted": null,
+    "tags": [
+      "hot-lead",
+      "partner",
+      "cold",
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1009",
+    "name": "Jude Jacobs",
+    "email": "jude.jacobs@jadepathco.io",
+    "company": "Jade Path Co",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": null,
+    "tags": [
+      "cold",
+      "partner",
+      "trial"
+    ]
+  },
+  {
+    "id": "CNT-1010",
+    "name": "Kira Kent",
+    "email": "kira.kent@keystonemfg.io",
+    "company": "Keystone Mfg",
+    "lifecycle_stage": "SQL",
+    "last_contacted": "02/09/2024",
+    "tags": [
+      "enterprise"
+    ]
+  },
+  {
+    "id": "CNT-1011",
+    "name": "Leo Laurent",
+    "email": null,
+    "company": "LuminaTech",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": "11/27/2024",
+    "tags": [
+      "cold",
+      "upsell",
+      "partner"
+    ]
+  },
+  {
+    "id": "CNT-1012",
+    "name": "Maya Mercer",
+    "email": "maya.mercer@maplegrovellc.io",
+    "company": "Maple Grove LLC",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "10/04/2024",
+    "tags": [
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1013",
+    "name": "Noah Nash",
+    "email": "noah.nash@northstarhealth.io",
+    "company": "NorthStar Health",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "07/13/2024",
+    "tags": [
+      "hot-lead"
+    ]
+  },
+  {
+    "id": "CNT-1014",
+    "name": "Olivia Ortega",
+    "email": "olivia.ortega@oceanwaveltd.io",
+    "company": "OceanWave Ltd",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": "03/27/2024",
+    "tags": [
+      "cold",
+      "upsell",
+      "partner"
+    ]
+  },
+  {
+    "id": "CNT-1015",
+    "name": "María José Orté́ga",
+    "email": "pierce.payne@pinnaclerealty.io",
+    "company": "Pinnacle Realty",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": "2024-03-03",
+    "tags": [
+      "newsletter",
+      "vip"
+    ]
+  },
+  {
+    "id": "CNT-1016",
+    "name": "Quinn Quinn",
+    "email": "quinn.quinn@quicksilverinc.io",
+    "company": "QuickSilver Inc",
+    "lifecycle_stage": "SQL",
+    "last_contacted": "03/09/2024",
+    "tags": [
+      "hot-lead"
+    ]
+  },
+  {
+    "id": "CNT-1017",
+    "name": "Rosa Reeves",
+    "email": "rosa.reeves@redrockmining.io",
+    "company": "RedRock Mining",
+    "lifecycle_stage": "Churned",
+    "last_contacted": "2024-06-05T00:00:00Z",
+    "tags": [
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1018",
+    "name": "Soren Stone",
+    "email": "soren.stone@silverlineedu.io",
+    "company": "Silverline Edu",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "07/13/2024",
+    "tags": [
+      "smb",
+      "at-risk",
+      "upsell",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "CNT-1019",
+    "name": "Talia Tate",
+    "email": null,
+    "company": "TerraFirm LLC",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-02-11T00:00:00Z",
+    "tags": [
+      "smb"
+    ]
+  },
+  {
+    "id": "CNT-1020",
+    "name": "Uma Underwood",
+    "email": "uma.underwood@umbracreative.io",
+    "company": "Umbra Creative",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-06-20",
+    "tags": [
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1021",
+    "name": "Victor Vale",
+    "email": "victor.vale@vertexsystems.io",
+    "company": "Vertex Systems",
+    "lifecycle_stage": "SQL",
+    "last_contacted": "06/20/2024",
+    "tags": [
+      "smb",
+      "cold",
+      "at-risk",
+      "trial"
+    ]
+  },
+  {
+    "id": "CNT-1021",
+    "name": "Victor Vale",
+    "email": "victor.vale@vertexsystems.io",
+    "company": "Vertex Systems",
+    "lifecycle_stage": "SQL",
+    "last_contacted": "06/20/2024",
+    "tags": [
+      "smb",
+      "cold",
+      "at-risk",
+      "trial"
+    ]
+  },
+  {
+    "id": "CNT-1022",
+    "name": "Wren Weston",
+    "email": null,
+    "company": "Waveform Inc",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "02/24/2024",
+    "tags": [
+      "at-risk",
+      "hot-lead",
+      "demo-requested"
+    ]
+  },
+  {
+    "id": "CNT-1023",
+    "name": "Xander Xu",
+    "email": "xander.xu@xenonbio.io",
+    "company": "Xenon Bio",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-12-18",
+    "tags": [
+      "vip",
+      "smb",
+      "event-attendee"
+    ]
+  },
+  {
+    "id": "CNT-1024",
+    "name": "Yara Young",
+    "email": "yara.young@yellowbrick.io",
+    "company": "YellowBrick",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-04-18T00:00:00Z",
+    "tags": [
+      "vip",
+      "newsletter",
+      "trial"
+    ]
+  },
+  {
+    "id": "CNT-1025",
+    "name": "Zane Zahra",
+    "email": "zane.zahra@zenflowinc.io",
+    "company": "ZenFlow Inc",
+    "lifecycle_stage": "Lead",
+    "last_contacted": "2024-07-24",
+    "tags": [
+      "demo-requested",
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1026",
+    "name": "Aiden Atkins",
+    "email": "aiden.atkins@astralgames.io",
+    "company": "Astral Games",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": "05/16/2024",
+    "tags": [
+      "cold",
+      "trial"
+    ]
+  },
+  {
+    "id": "CNT-1027",
+    "name": "Blair Bronte",
+    "email": "blair.bronte@brightpathorg.io",
+    "company": "BrightPath Org",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": "12/12/2024",
+    "tags": [
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1028",
+    "name": "Corey Costa",
+    "email": "corey.costa@cobaltenergy.io",
+    "company": "Cobalt Energy",
+    "lifecycle_stage": "SQL",
+    "last_contacted": "2024-04-16T00:00:00Z",
+    "tags": [
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1029",
+    "name": "Dana Donovan",
+    "email": "dana.donovan@delphilabs.io",
+    "company": "Delphi Labs",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-02-27T00:00:00Z",
+    "tags": [
+      "upsell"
+    ]
+  },
+  {
+    "id": "CNT-1030",
+    "name": "Evan Ellis",
+    "email": "evan.ellis@emberstyleco.io",
+    "company": "Ember Style Co",
+    "lifecycle_stage": "Lead",
+    "last_contacted": "2024-03-14T00:00:00Z",
+    "tags": [
+      "smb",
+      "upsell",
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1031",
+    "name": "Faye Flynn",
+    "email": "faye.flynn@falconaero.io",
+    "company": "Falcon Aero",
+    "lifecycle_stage": "MQL",
+    "last_contacted": "2024-03-05",
+    "tags": [
+      "trial",
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1032",
+    "name": "Glen Granger",
+    "email": "glen.granger@griffinandassoc.io",
+    "company": "Griffin & Assoc",
+    "lifecycle_stage": "Lead",
+    "last_contacted": "2024-10-16T00:00:00Z",
+    "tags": [
+      "hot-lead",
+      "demo-requested",
+      "vip"
+    ]
+  },
+  {
+    "id": "CNT-1033",
+    "name": "Hana Holt",
+    "email": "hana.holt@havenhomes.io",
+    "company": "Haven Homes",
+    "lifecycle_stage": "MQL",
+    "last_contacted": null,
+    "tags": [
+      "upsell",
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1034",
+    "name": "Ivan Iyer",
+    "email": "ivan.iyer@indigopress.io",
+    "company": "Indigo Press",
+    "lifecycle_stage": "Opportunity",
+    "last_contacted": "2024-04-10T00:00:00Z",
+    "tags": [
+      "trial",
+      "partner"
+    ]
+  },
+  {
+    "id": "CNT-1035",
+    "name": "Jade Jansen",
+    "email": "jade.jansen@jasperenergy.io",
+    "company": "Jasper Energy",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "01/24/2024",
+    "tags": [
+      "vip",
+      "trial",
+      "demo-requested",
+      "upsell"
+    ]
+  },
+  {
+    "id": "CNT-1036",
+    "name": "Kai Kapoor",
+    "email": "kai.kapoor@kitefinancial.io",
+    "company": "Kite Financial",
+    "lifecycle_stage": "Customer",
+    "last_contacted": null,
+    "tags": [
+      "at-risk"
+    ]
+  },
+  {
+    "id": "CNT-1037",
+    "name": "Lyra Lane",
+    "email": "lyra.lane@lotushealth.io",
+    "company": "Lotus Health",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "2024-03-06",
+    "tags": [
+      "trial",
+      "smb",
+      "demo-requested",
+      "enterprise"
+    ]
+  },
+  {
+    "id": "CNT-1038",
+    "name": "Miles Monroe",
+    "email": "miles.monroe@mercurycomm.io",
+    "company": "Mercury Comm",
+    "lifecycle_stage": "Lead",
+    "last_contacted": "2024-08-26",
+    "tags": [
+      "newsletter"
+    ]
+  },
+  {
+    "id": "CNT-1039",
+    "name": "Nadia Norris",
+    "email": "nadia.norris@novarobotics.io",
+    "company": "Nova Robotics",
+    "lifecycle_stage": "Customer",
+    "last_contacted": "2024-09-15T00:00:00Z",
+    "tags": [
+      "smb"
+    ]
+  }
+]

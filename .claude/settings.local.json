@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm seed:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(pkill:*)",
+      "Bash(echo 1. Login: ${TOKEN:0:20}...:*)",
+      "Bash(lsof:*)",
+      "Bash(kill 1165:*)",
+      "Bash(pnpm build:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebSearch",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(pnpm add:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

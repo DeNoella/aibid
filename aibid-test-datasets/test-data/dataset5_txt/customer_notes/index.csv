@@ -1,0 +1,6 @@
+filename,customer_name,date,topic,associated_deal_stage,owner
+note_acme_corp_2024_03.txt,Acme Corp,2024-03-14,QBR — Q1 Review & Renewal Discussion,Closed Won,Jordan Ellis
+note_vertex_systems_2024_05.txt,Vertex Systems,2024-05-08,Deal Negotiation — Pricing & Security Review,Negotiation,Morgan Lee
+note_northstar_health_2024_06.txt,NorthStar Health,2024-06-17,Proposal Follow-up — BAA Redlines & Budget Approval,Proposal,Morgan Lee
+note_quicksilver_payments_2024_07.txt,QuickSilver Inc,2024-07-03,Negotiation Check-in — 2-Year Deal Structure,Negotiation,Taylor Brooks
+note_ironclad_security_2024_06.txt,IronClad Security,2024-06-19,Technical Review — Security Stack & VRQ,Negotiation,Taylor Brooks

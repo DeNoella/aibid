@@ -1,0 +1,34 @@
+==========================================================
+CALL SUMMARY — VERTEX SYSTEMS DEAL NEGOTIATION
+Date: May 8, 2024
+Participants: Morgan Lee (AE, AIBID), Cassandra Wu (Vertex CPO), Finn Lachlan (Vertex Legal)
+Duration: 52 minutes
+==========================================================
+
+CONTEXT
+-------
+Vertex Systems ($320K deal, currently in Negotiation stage) is evaluating AIBID Enterprise alongside a competitor (unnamed, referred to as "the other platform" by Cassandra). Decision expected by end of May.
+
+KEY POINTS DISCUSSED
+--------------------
+1. CONTRACT TERMS
+   Finn pushed back on the standard 12-month commitment, requesting a 6-month initial pilot with an option to extend. Morgan communicated that 6-month contracts require VP approval and carry a 15% price premium. Finn acknowledged and said they would "probably just do 12 months if the pilot clause can be added." Morgan to escalate to VP Sales for a custom pilot amendment clause.
+
+2. SECURITY & COMPLIANCE
+   Cassandra asked pointed questions about SOC 2 Type II certification status. Morgan confirmed it is in place and offered to share the audit report under NDA. Cassandra also asked about data residency — Vertex operates in the EU and requires data stored in Frankfurt region. Morgan confirmed EU data residency is available on Enterprise tier.
+
+3. COMPETITOR CONTEXT
+   Vertex has been demoing "the other platform" for 3 weeks. Cassandra mentioned they find AIBID's reporting UI superior but have concerns about AIBID's native Salesforce sync (bidirectional sync is listed as "coming soon"). Morgan: "Expected GA in Q3 2024 — I can get engineering to confirm timeline." This is a potential blocker.
+
+4. PRICING
+   The $320K figure is for 80 seats + full platform. Vertex asked about removing the AI Insights add-on to reduce cost. Morgan indicated that would bring price to ~$275K. Vertex seemed receptive.
+
+NEXT STEPS
+----------
+- Morgan Lee: Escalate pilot amendment clause to VP Sales by May 10
+- Morgan Lee: Share SOC 2 report (under NDA) by May 9
+- Morgan Lee: Confirm Salesforce sync GA timeline with engineering
+- Cassandra Wu: Internal alignment on pricing by May 15
+- Morgan Lee: Follow-up call with full decision-makers May 20
+
+DEAL RISK: Medium. Salesforce sync timeline is the swing factor.

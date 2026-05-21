@@ -1,0 +1,47 @@
+==========================================================
+MEETING NOTES — IRONCLAD SECURITY NEGOTIATION + TECHNICAL REVIEW
+Date: June 19, 2024
+Participants: Taylor Brooks (AE), Sam Rivera (SE), Bryn Nakashima (IronClad CTO), Leonie Fassbender (IronClad Head of Procurement)
+==========================================================
+
+PRE-CALL CONTEXT
+----------------
+IronClad Security is a cybersecurity firm — they are predictably rigorous about vendor due diligence. This is their second technical call. The deal ($175K, currently at 75% probability) has been in Negotiation for 6 weeks.
+
+TECHNICAL REVIEW (Bryn Nakashima)
+-----------------------------------
+Bryn asked detailed questions about the AIBID infrastructure stack:
+
+1. DATA ENCRYPTION
+   - In transit: TLS 1.3 ✓
+   - At rest: AES-256 ✓
+   - Bryn asked about key management. Sam confirmed customer-managed encryption keys (CMEK) are available in the Enterprise Security add-on (+$12K/year). IronClad will almost certainly need this.
+
+2. PENETRATION TESTING
+   - IronClad requires evidence of annual third-party pen test. Sam confirmed the most recent Cobalt.io report is available under NDA. Sam to send after call.
+
+3. ACCESS CONTROLS
+   - Bryn: "Can you support role-based access at the field level, not just the record level?"
+   - Sam: "Field-level security is on the roadmap for Q4 2024. Currently we offer record-level and object-level permissions."
+   - Bryn: "That's a gap. Not a blocker, but we'd want a written commitment to the Q4 timeline."
+   - Taylor: "We can provide a product roadmap letter for the Q4 field-level security feature."
+
+4. VENDOR RISK QUESTIONNAIRE
+   IronClad sent a 47-page vendor risk questionnaire (VRQ) last week. Sam has completed sections 1–4 (infrastructure). Legal is handling sections 5–7 (contractual). ETA for full completion: June 26.
+
+PROCUREMENT (Leonie Fassbender)
+---------------------------------
+Leonie confirmed IronClad has a strict 3-quote policy but that AIBID has already met their preferred vendor criteria based on the SOC 2 report. She asked for the final commercial proposal to be addressed to her directly with purchase order instructions included.
+
+Taylor flagged that close date in pipeline is June 30 — Leonie said that is achievable only if VRQ is returned by June 26 and legal review clears by June 28.
+
+ACTION ITEMS
+------------
+- Sam Rivera: Send Cobalt.io pen test report (NDA required) — June 19
+- Sam Rivera: Complete VRQ sections 5–7 with Legal — June 26
+- Taylor Brooks: Draft product roadmap letter re: Q4 field-level security — June 21
+- Taylor Brooks: Reissue commercial proposal to Leonie Fassbender — June 21
+- Bryn Nakashima: Internal sign-off from CISO — by June 27
+- Leonie Fassbender: PO release — by June 30
+
+PROBABILITY ASSESSMENT: Holding at 75%. Field-level security gap is noted but not a blocker. VRQ timeline is tight.
