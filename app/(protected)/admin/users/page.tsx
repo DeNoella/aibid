@@ -59,6 +59,7 @@ interface AdminUser {
   email: string;
   role: string;
   department: string | null;
+  organization_name: string | null;
   last_login: string | null;
   is_active: number;
   created_at: string;
@@ -180,7 +181,7 @@ export default function AdminUsersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">User Management</h1>
-          <p className="text-sm text-muted-foreground">View, update, and delete user accounts</p>
+          <p className="text-sm text-muted-foreground">View, update, and delete all users across the system</p>
         </div>
         <Button onClick={() => { setCreateForm(emptyForm); setCreateTempPassword(null); setCreateOpen(true); }}>
           <Plus className="w-4 h-4 mr-2" />
@@ -230,6 +231,7 @@ export default function AdminUsersPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Organization</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Last login</TableHead>
@@ -241,6 +243,7 @@ export default function AdminUsersPage() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{user.organization_name || '—'}</TableCell>
                   <TableCell><RoleBadge role={user.role} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{user.department || '—'}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{formatRelativeTime(user.last_login)}</TableCell>
@@ -332,6 +335,7 @@ export default function AdminUsersPage() {
             <div className="space-y-4 mt-6 text-sm">
               <div><p className="text-muted-foreground">Name</p><p className="font-medium">{viewUser.name}</p></div>
               <div><p className="text-muted-foreground">Email</p><p className="font-medium">{viewUser.email}</p></div>
+              <div><p className="text-muted-foreground">Organization</p><p className="font-medium">{viewUser.organization_name || '—'}</p></div>
               <div><p className="text-muted-foreground">Role</p><RoleBadge role={viewUser.role} /></div>
               <div><p className="text-muted-foreground">Department</p><p className="font-medium">{viewUser.department || '—'}</p></div>
               <div><p className="text-muted-foreground">Activity</p>{activityBadge(viewUser.last_login)}</div>

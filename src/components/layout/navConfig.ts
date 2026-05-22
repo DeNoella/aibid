@@ -1,5 +1,10 @@
 export const adminNavItems = [
+  { label: 'Overview', href: '/admin/overview' },
   { label: 'User management', href: '/admin/users' },
+  { label: 'AI model health', href: '/admin/ai-health' },
+  { label: 'Audit & governance', href: '/admin/audit' },
+  { label: 'Backup & restore', href: '/admin/backup' },
+  { label: 'Maintenance', href: '/admin/maintenance' },
 ];
 
 export const analystNavItems = [

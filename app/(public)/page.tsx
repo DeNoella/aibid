@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ArrowRight, BarChart3, Brain, Shield, Zap, TrendingUp, 
@@ -8,17 +8,36 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ParticleCanvas } from '@/components/ParticleCanvas';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/components/ui/utils';
 
 export default function LandingPage() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navLinks = [
+    { label: 'Home', href: '#' },
     { label: 'Features', href: '#features' },
     { label: 'Benefits', href: '#benefits' },
     { label: 'Testimonials', href: '#testimonials' },
   ];
+
+  const scrollToNavTarget = (href: string) => {
+    if (href === '#') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    document.getElementById(href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const features = [
     { icon: BarChart3, title: 'Interactive Dashboards', description: 'Real-time visualizations with dynamic charts and comprehensive KPI tracking.' },
@@ -59,92 +78,123 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen overflow-x-hidden bg-transparent text-foreground">
+      <ParticleCanvas fullPage variant="document" />
 
+      <div className="relative z-10 bg-transparent">
       {/* Navigation */}
-      <nav className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-xl font-bold tracking-wide text-foreground">AIBID</span>
-            </div>
+      <header className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
+        <nav
+          className={cn(
+            'mx-auto max-w-7xl rounded-2xl border transition-all duration-300',
+            scrolled
+              ? 'border-border/80 bg-background/90 shadow-lg shadow-black/25 backdrop-blur-xl'
+              : 'border-border/40 bg-background/55 shadow-md shadow-black/10 backdrop-blur-md'
+          )}
+        >
+          <div className="flex items-center justify-between gap-3 px-3 py-2.5 sm:px-5 sm:py-3">
+            <button
+              type="button"
+              onClick={() => scrollToNavTarget('#')}
+              className="group flex min-w-0 items-center"
+            >
+              <span className="truncate font-serif text-lg font-bold tracking-wide text-foreground transition-colors group-hover:text-brand sm:text-xl">
+                AIBID
+              </span>
+            </button>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden items-center rounded-full border border-border/50 bg-secondary/40 p-1 md:flex">
               {navLinks.map((link) => (
                 <button
                   key={link.label}
-                  onClick={() => document.getElementById(link.href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  type="button"
+                  onClick={() => scrollToNavTarget(link.href)}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-background/80 hover:text-brand"
                 >
                   {link.label}
                 </button>
               ))}
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-3">
-                <Button variant="ghost" onClick={() => router.push('/login')}>Sign In</Button>
-                <Button onClick={() => router.push('/register')}>
-                  Get Started <ArrowRight className="w-4 h-4 ml-2" />
+            <div className="flex items-center gap-2">
+              <div className="hidden items-center gap-2 md:flex">
+                <Button
+                  variant="ghost"
+                  className="rounded-xl hover:bg-secondary/70"
+                  onClick={() => router.push('/login')}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  className="rounded-xl shadow-md shadow-brand/20 transition-transform hover:scale-[1.02]"
+                  onClick={() => router.push('/register')}
+                >
+                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="md:hidden flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-xl md:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
             </div>
           </div>
-        </div>
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-border bg-background overflow-hidden"
-            >
-              <div className="flex flex-col p-6 gap-4">
-                {navLinks.map((link) => (
-                  <button
-                    key={link.label}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      document.getElementById(link.href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="text-left text-lg font-medium text-foreground py-2 border-b border-border/50"
-                  >
-                    {link.label}
-                  </button>
-                ))}
-                <div className="flex flex-col gap-3 mt-4">
-                  <Button variant="outline" className="w-full justify-center" onClick={() => router.push('/login')}>
-                    Sign In
-                  </Button>
-                  <Button
-                    className="w-full justify-center bg-neutral-800 dark:bg-neutral-200 dark:text-neutral-900"
-                    onClick={() => router.push('/register')}
-                  >
-                    Get Started <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden border-t border-border/60 md:hidden"
+              >
+                <div className="flex flex-col gap-2 p-4">
+                  {navLinks.map((link) => (
+                    <button
+                      key={link.label}
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        scrollToNavTarget(link.href);
+                      }}
+                      className="rounded-xl px-4 py-3 text-left text-base font-medium text-foreground transition-colors hover:bg-secondary/70"
+                    >
+                      {link.label}
+                    </button>
+                  ))}
+                  <div className="mt-2 flex flex-col gap-2 border-t border-border/60 pt-4">
+                    <Button variant="outline" className="w-full justify-center rounded-xl" onClick={() => router.push('/login')}>
+                      Sign In
+                    </Button>
+                    <Button
+                      className="w-full justify-center rounded-xl"
+                      onClick={() => router.push('/register')}
+                    >
+                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </nav>
+      </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 py-20 md:py-28">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-              AI-Powered Interactive<br />Business Intelligence
+      <section className="relative overflow-hidden pt-24 sm:pt-28">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 md:py-28">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-3xl font-bold leading-tight text-foreground sm:text-5xl md:text-6xl">
+              AI-Powered Interactive<br className="hidden sm:block" /> Business Intelligence
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
+            <p className="mb-8 text-base leading-relaxed text-muted-foreground sm:mb-10 sm:text-lg md:text-xl">
               Transform organizational data into meaningful, real-time insights through interactive
               visualizations and artificial intelligence techniques. Make smarter decisions faster.
             </p>
@@ -162,13 +212,12 @@ export default function LandingPage() {
             </div>
           </motion.div>
         </div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-neutral-50 to-white dark:from-neutral-900 dark:to-background" />
       </section>
 
       {/* Stats */}
-      <section className="border-y border-border bg-neutral-50 dark:bg-neutral-900/50">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="py-10 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {[
               { label: 'Data Points Processed', value: '2.4M+' },
               { label: 'AI Insights Generated', value: '15K+' },
@@ -183,8 +232,8 @@ export default function LandingPage() {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <p className="text-4xl font-bold text-foreground mb-2">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">{stat.value}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -192,11 +241,11 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20 md:py-28">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-4">Comprehensive Analytics Platform</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+      <section id="features" className="py-16 sm:py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">Comprehensive Analytics Platform</h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
               Everything you need to make data-driven decisions and stay ahead of the competition
             </p>
           </motion.div>
@@ -220,12 +269,12 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits */}
-      <section id="benefits" className="py-20 bg-neutral-50 dark:bg-neutral-900/50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section id="benefits" className="py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <h2 className="text-4xl font-bold text-foreground mb-6">Expected Outcomes & Benefits</h2>
-              <p className="text-lg text-muted-foreground mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6">Expected Outcomes & Benefits</h2>
+              <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8">
                 Our platform delivers measurable results that transform how organizations understand and utilize their data.
               </p>
               <div className="space-y-4">
@@ -251,9 +300,9 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-card rounded-2xl p-8 shadow-xl border border-border"
+              className="bg-card rounded-2xl p-6 sm:p-8 shadow-xl border border-border"
             >
-              <h3 className="text-2xl font-bold text-foreground mb-6">System Modules</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-6">System Modules</h3>
               <div className="space-y-4">
                 {[
                   { name: 'Data Collection', desc: 'Structured organizational data capture' },
@@ -280,9 +329,9 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-20 md:py-28">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-16">
+      <section id="testimonials" className="py-16 sm:py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">What Our Users Say</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Hear from organizations that have transformed their data analytics with AIBID
@@ -312,14 +361,14 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-neutral-900 dark:bg-neutral-950">
-        <div className="max-w-7xl mx-auto px-6 text-center">
+      <section className="py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <h2 className="text-4xl font-bold text-white mb-6">Ready to Transform Your Data?</h2>
-            <p className="text-xl text-neutral-300 mb-10 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6">Ready to Transform Your Data?</h2>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto">
               Join organizations that are already making smarter decisions with AI-powered analytics
             </p>
-            <Button size="lg" className="bg-white text-neutral-900 hover:bg-neutral-100" onClick={() => router.push('/register')}>
+            <Button size="lg" onClick={() => router.push('/register')}>
               Get Started Today <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </motion.div>
@@ -327,16 +376,13 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-background">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+      <footer className="py-10 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-neutral-800 dark:bg-neutral-700 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold">AI</span>
-                </div>
                 <div>
-                  <h3 className="font-bold text-foreground">AIBID</h3>
+                  <h3 className="font-serif font-bold text-foreground">AIBID</h3>
                   <p className="text-xs text-muted-foreground">Analytics Platform</p>
                 </div>
               </div>
@@ -363,7 +409,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-border/20 pt-8 md:flex-row">
             <p className="text-sm text-muted-foreground">© 2026 Bouletteproof Rwanda Limited. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <button className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-5 h-5" /></button>
@@ -373,6 +419,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

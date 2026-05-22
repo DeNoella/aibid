@@ -19,7 +19,7 @@ export function RoleGuard({ allowedRoles, children, redirectTo }: RoleGuardProps
 
   useEffect(() => {
     if (!loading && user && !allowedRoles.includes(user.role)) {
-      router.replace(redirectTo ?? (user.role === 'admin' ? '/admin/users' : '/dashboard'));
+      router.replace(redirectTo ?? (user.role === 'admin' ? '/admin/overview' : '/dashboard'));
     }
   }, [user, loading, allowedRoles, router, redirectTo]);
 

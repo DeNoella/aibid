@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { AuthFormCard } from '@/components/auth/AuthFormCard';
+import { ParticleCanvas } from '@/components/ParticleCanvas';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPasswordErrors } from '@/utils/validation';
 import { api, ApiError } from '@/services/api';
@@ -100,7 +101,9 @@ function AuthPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6">
+    <div className="relative min-h-screen text-foreground">
+      <ParticleCanvas fullPage />
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         <button
           type="button"
@@ -226,6 +229,7 @@ function AuthPageContent() {
           </AuthFormCard>
         </motion.div>
       </div>
+      </div>
     </div>
   );
 }
@@ -233,8 +237,11 @@ function AuthPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="relative min-h-screen">
+        <ParticleCanvas fullPage />
+        <div className="relative z-10 flex min-h-screen items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
       </div>
     }>
       <AuthPageContent />

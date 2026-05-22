@@ -6,7 +6,7 @@ import { updateUser, getUser, deleteUser } from '@/lib/services/admin.service';
 export const GET = withAuth(async (_req, user, ctx) => {
   requireRole(user, 'admin');
   const { id } = await ctx.params;
-  const profile = getUser(user.organizationId, id);
+  const profile = getUser(id);
   return NextResponse.json(profile);
 });
 
@@ -14,13 +14,13 @@ export const PUT = withAuth(async (req, user, ctx) => {
   requireRole(user, 'admin');
   const { id } = await ctx.params;
   const body = await req.json();
-  updateUser(user.organizationId, id, body);
+  updateUser(id, body);
   return NextResponse.json({ success: true });
 });
 
 export const DELETE = withAuth(async (_req, user, ctx) => {
   requireRole(user, 'admin');
   const { id } = await ctx.params;
-  deleteUser(user.organizationId, id, user.userId);
+  deleteUser(id, user.userId);
   return NextResponse.json({ success: true });
 });

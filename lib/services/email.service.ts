@@ -17,31 +17,99 @@ export class EmailService {
 
     const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Approve your login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f9fafb; margin: 0; padding: 20px; color: #111827; }
-    .card { max-width: 520px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
-    .header { background: #111827; padding: 28px 20px; text-align: center; color: #fff; }
-    .logo { display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #374151; font-weight: 700; margin-bottom: 8px; }
-    .content { padding: 28px 20px; text-align: center; }
-    .btn { display: inline-block; padding: 12px 24px; border-radius: 8px; background: #111827; color: #fff !important; text-decoration: none; font-weight: 600; }
-    .meta { color: #6b7280; font-size: 13px; margin-top: 18px; line-height: 1.5; }
-    .footer { font-size: 12px; color: #9ca3af; padding: 16px 20px; text-align: center; border-top: 1px solid #e5e7eb; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background-color: #0d1117;
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    .card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .header {
+      padding: 28px 24px 20px;
+      text-align: center;
+      border-bottom: 1px solid #30363d;
+      background: #0d1117;
+    }
+    .logo {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.04em;
+      margin: 0 0 6px 0;
+    }
+    .tagline {
+      margin: 0;
+      color: #8b949e;
+      font-size: 13px;
+    }
+    .content {
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .title {
+      margin: 0 0 10px 0;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .text {
+      margin: 0 0 24px 0;
+      color: #8b949e;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 10px;
+      background: #f0883e;
+      color: #0d1117 !important;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .meta {
+      color: #8b949e;
+      font-size: 13px;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+    .footer {
+      font-size: 12px;
+      color: #8b949e;
+      padding: 16px 24px;
+      text-align: center;
+      border-top: 1px solid #30363d;
+      background: #0d1117;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="header">
-      <div class="logo">AI</div>
-      <div style="font-weight:700;">AIBID</div>
+      <p class="logo">AIBID</p>
+      <p class="tagline">Analytics Platform</p>
     </div>
     <div class="content">
-      <h2 style="margin: 0 0 10px 0;">Login attempt detected</h2>
-      <p style="margin: 0 0 20px 0; color:#000000;">To finish sign in, approve this request in the next 15 minutes.</p>
+      <h2 class="title">Login attempt detected</h2>
+      <p class="text">To finish signing in, approve this request within the next 15 minutes.</p>
       <a href="${approveUrl}" class="btn">Approve Login</a>
       <p class="meta">If this was not you, ignore this message. This link is single-use and expires automatically.</p>
     </div>
@@ -63,7 +131,7 @@ export class EmailService {
     await transporter.sendMail({
       from: smtpFrom,
       to: email,
-      subject: 'AIBID-Approve your login',
+      subject: 'AIBID — Approve your login',
       html,
     });
   }

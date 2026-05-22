@@ -22,7 +22,7 @@ if (!admin) {
   process.exit(1);
 }
 
-deleteUser(user.organization_id, user.id, admin.id);
+deleteUser(user.id, admin.id);
 
 const remaining = db.prepare('SELECT email, name, role FROM users').all();
 console.log(`Deleted ${EMAIL}`);

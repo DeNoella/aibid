@@ -5,21 +5,11 @@ import { TopNav } from '@/components/layout/TopNav';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { MaintenanceOverlay } from '@/components/layout/MaintenanceOverlay';
 import { motion, AnimatePresence } from 'motion/react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!user || user.role !== 'admin') return;
-    const allowed = pathname.startsWith('/admin/users') || pathname.startsWith('/settings');
-    if (!allowed) {
-      router.replace('/admin/users');
-    }
-  }, [user, pathname, router]);
 
   if (loading) {
     return (
@@ -34,12 +24,12 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <MaintenanceOverlay />
       <TopNav />
-      <div className="flex min-h-[calc(100vh-4rem)]">
+      <div className="flex min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)] w-full">
         <AppSidebar />
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 w-full overflow-x-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

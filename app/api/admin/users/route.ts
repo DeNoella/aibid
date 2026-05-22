@@ -7,7 +7,6 @@ export const GET = withAuth(async (req, user) => {
   requireRole(user, 'admin');
   const { searchParams } = new URL(req.url);
   const users = getUsers(
-    user.organizationId,
     searchParams.get('search') ?? undefined,
     searchParams.get('role') ?? undefined,
     searchParams.get('status') ?? undefined

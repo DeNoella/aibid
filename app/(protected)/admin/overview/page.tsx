@@ -13,7 +13,6 @@ import {
   Users,
   Brain,
   HardDrive,
-  Server,
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
@@ -57,7 +56,6 @@ const quickLinks = [
   { href: '/admin/users', label: 'User Management', icon: Users },
   { href: '/admin/ai-health', label: 'AI Health', icon: Brain },
   { href: '/admin/audit', label: 'Audit & Security', icon: AlertTriangle },
-  { href: '/admin/datasources', label: 'Data Sources', icon: Server },
   { href: '/admin/backup', label: 'Backup & Restore', icon: HardDrive },
   { href: '/admin/maintenance', label: 'Maintenance', icon: LayoutDashboard },
 ];

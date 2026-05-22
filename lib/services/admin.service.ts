@@ -104,16 +104,26 @@ export function getAdminOverview(orgId: string) {
   };
 }
 
-export function getUsers(orgId: string, search?: string, role?: string, status?: string) {
+export function getUsers(search?: string, role?: string, status?: string) {
   const db = getDb();
-  let where = 'WHERE organization_id = ?';
-  const params: unknown[] = [orgId];
+  let where = 'WHERE 1=1';
+  const params: unknown[] = [];
   if (search) {
-    where += ' AND (name LIKE ? OR email LIKE ?)';
+    where += ' AND (u.name LIKE ? OR u.email LIKE ?)';
     params.push(`%${search}%`, `%${search}%`);
   }
-  if (role) { where += ' AND role = ?'; params.push(role === 'SYSTEM_ADMIN' ? 'admin' : 'analyst'); }
-  const rows = db.prepare(`SELECT id, name, email, role, department, last_login, is_active, created_at FROM users ${where} ORDER BY last_login IS NULL, last_login DESC`).all(...params) as Record<string, unknown>[];
+  if (role) {
+    where += ' AND u.role = ?';
+    params.push(role === 'SYSTEM_ADMIN' ? 'admin' : 'analyst');
+  }
+  const rows = db.prepare(`
+    SELECT u.id, u.name, u.email, u.role, u.department, u.last_login, u.is_active, u.created_at,
+      o.name as organization_name
+    FROM users u
+    LEFT JOIN organizations o ON u.organization_id = o.id
+    ${where}
+    ORDER BY u.last_login IS NULL, u.last_login DESC
+  `).all(...params) as Record<string, unknown>[];
   return rows.filter((u) => {
     if (!status) return true;
     const lastLogin = u.last_login as string | null;
@@ -145,9 +155,9 @@ export function createUser(orgId: string, data: { name: string; email: string; r
   return { id, tempPassword };
 }
 
-export function updateUser(orgId: string, userId: string, data: { name?: string; email?: string; role?: string; department?: string }) {
+export function updateUser(userId: string, data: { name?: string; email?: string; role?: string; department?: string }) {
   const db = getDb();
-  const existing = db.prepare('SELECT id FROM users WHERE id = ? AND organization_id = ?').get(userId, orgId);
+  const existing = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
   if (!existing) {
     throw new AppError('User not found.', 404);
   }
@@ -162,17 +172,20 @@ export function updateUser(orgId: string, userId: string, data: { name?: string;
   }
 
   const role = data.role === 'SYSTEM_ADMIN' ? 'admin' : data.role === 'DATA_ANALYST' ? 'analyst' : data.role;
-  db.prepare(`UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email), role = COALESCE(?, role), department = COALESCE(?, department), updated_at = datetime('now') WHERE id = ? AND organization_id = ?`).run(
-    data.name?.trim(), emailToSave, role, data.department, userId, orgId
+  db.prepare(`UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email), role = COALESCE(?, role), department = COALESCE(?, department), updated_at = datetime('now') WHERE id = ?`).run(
+    data.name?.trim(), emailToSave, role, data.department, userId
   );
 }
 
-export function getUser(orgId: string, userId: string) {
+export function getUser(userId: string) {
   const db = getDb();
   const user = db.prepare(`
-    SELECT id, name, email, role, department, last_login, is_active, created_at
-    FROM users WHERE id = ? AND organization_id = ?
-  `).get(userId, orgId) as AdminUserRow | undefined;
+    SELECT u.id, u.name, u.email, u.role, u.department, u.last_login, u.is_active, u.created_at,
+      o.name as organization_name
+    FROM users u
+    LEFT JOIN organizations o ON u.organization_id = o.id
+    WHERE u.id = ?
+  `).get(userId) as (AdminUserRow & { organization_name: string | null }) | undefined;
 
   if (!user) {
     throw new AppError('User not found.', 404);
@@ -223,14 +236,14 @@ type AdminUserRow = {
   created_at: string;
 };
 
-export function deleteUser(orgId: string, userId: string, actingUserId: string) {
+export function deleteUser(userId: string, actingUserId: string) {
   const db = getDb();
 
   if (userId === actingUserId) {
     throw new AppError('You cannot delete your own account.');
   }
 
-  const user = db.prepare('SELECT id, role FROM users WHERE id = ? AND organization_id = ?').get(userId, orgId) as
+  const user = db.prepare('SELECT id, role FROM users WHERE id = ?').get(userId) as
     | { id: string; role: string }
     | undefined;
 
@@ -241,8 +254,8 @@ export function deleteUser(orgId: string, userId: string, actingUserId: string) 
   if (user.role === 'admin') {
     const adminCount = db.prepare(`
       SELECT COUNT(*) as count FROM users
-      WHERE organization_id = ? AND role = 'admin' AND is_active = 1
-    `).get(orgId) as { count: number };
+      WHERE role = 'admin' AND is_active = 1
+    `).get() as { count: number };
 
     if (adminCount.count <= 1) {
       throw new AppError('Cannot delete the only active admin account.');
@@ -250,7 +263,7 @@ export function deleteUser(orgId: string, userId: string, actingUserId: string) 
   }
 
   purgeUserReferences(db, userId);
-  db.prepare('DELETE FROM users WHERE id = ? AND organization_id = ?').run(userId, orgId);
+  db.prepare('DELETE FROM users WHERE id = ?').run(userId);
 }
 
 export function setUserActive(orgId: string, userId: string, isActive: boolean) {
@@ -324,6 +337,99 @@ export function getNlpMetrics(orgId: string) {
   const total = db.prepare("SELECT COUNT(*) as count FROM voice_query_log WHERE date(created_at) = date('now')").get() as { count: number };
   const failed = db.prepare("SELECT COUNT(*) as count FROM voice_query_log WHERE date(created_at) = date('now') AND success = 0").get() as { count: number };
   return { avgResolutionMs: Math.round(avg.avg ?? 245), totalToday: total.count, failedToday: failed.count };
+}
+
+export function getUserActivityLogs(filters: {
+  from?: string;
+  to?: string;
+  userId?: string;
+  module?: string;
+}) {
+  const db = getDb();
+
+  let auditWhere = 'WHERE a.user_id IS NOT NULL';
+  let loginWhere = 'WHERE 1=1';
+  const auditParams: unknown[] = [];
+  const loginParams: unknown[] = [];
+
+  if (filters.userId) {
+    auditWhere += ' AND a.user_id = ?';
+    loginWhere += ' AND lh.user_id = ?';
+    auditParams.push(filters.userId);
+    loginParams.push(filters.userId);
+  }
+  if (filters.from) {
+    auditWhere += ' AND a.created_at >= ?';
+    loginWhere += ' AND lh.created_at >= ?';
+    auditParams.push(filters.from);
+    loginParams.push(filters.from);
+  }
+  if (filters.to) {
+    auditWhere += ' AND a.created_at <= ?';
+    loginWhere += ' AND lh.created_at <= ?';
+    auditParams.push(`${filters.to} 23:59:59`);
+    loginParams.push(`${filters.to} 23:59:59`);
+  }
+  if (filters.module && filters.module !== 'all') {
+    if (filters.module === 'Auth') {
+      auditWhere += ' AND a.module = ?';
+      auditParams.push('Auth');
+    } else {
+      auditWhere += ' AND a.module = ?';
+      auditParams.push(filters.module);
+      loginWhere += ' AND 1=0';
+    }
+  }
+
+  return db.prepare(`
+    SELECT * FROM (
+      SELECT
+        a.id,
+        a.user_id,
+        a.user_name,
+        u.email as user_email,
+        'action' as activity_type,
+        a.action,
+        a.module,
+        COALESCE(a.details, '') as details,
+        a.ip_address,
+        NULL as user_agent,
+        a.created_at
+      FROM audit_logs a
+      LEFT JOIN users u ON a.user_id = u.id
+      ${auditWhere}
+      UNION ALL
+      SELECT
+        lh.id,
+        lh.user_id,
+        u.name as user_name,
+        u.email as user_email,
+        'session' as activity_type,
+        CASE WHEN lh.success = 1 THEN 'Logged in' ELSE 'Failed login' END as action,
+        'Auth' as module,
+        CASE WHEN lh.success = 1 THEN 'User accessed the system' ELSE 'Unsuccessful login attempt' END as details,
+        lh.ip_address,
+        lh.user_agent,
+        lh.created_at
+      FROM login_history lh
+      JOIN users u ON lh.user_id = u.id
+      ${loginWhere}
+    )
+    ORDER BY created_at DESC
+    LIMIT 300
+  `).all(...auditParams, ...loginParams) as {
+    id: string;
+    user_id: string;
+    user_name: string;
+    user_email: string | null;
+    activity_type: string;
+    action: string;
+    module: string;
+    details: string;
+    ip_address: string | null;
+    user_agent: string | null;
+    created_at: string;
+  }[];
 }
 
 export function getAuditFeed(orgId: string, filters: { from?: string; to?: string; userId?: string; actionType?: string; riskLevel?: string }) {

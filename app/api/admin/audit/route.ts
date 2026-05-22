@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-utils';
 import { requireRole } from '@/lib/api-auth';
-import { getAuditFeed, revokeUserSession, getAuditAlertRules, saveAuditAlertRule } from '@/lib/services/admin.service';
+import { getAuditFeed, getUserActivityLogs, revokeUserSession, getAuditAlertRules, saveAuditAlertRule } from '@/lib/services/admin.service';
 import { getUsers } from '@/lib/services/admin.service';
 
 export const GET = withAuth(async (req, user) => {
   requireRole(user, 'admin');
   const { searchParams } = new URL(req.url);
-  const events = getAuditFeed(user.organizationId, {
+  const filters = {
     from: searchParams.get('from') ?? undefined,
     to: searchParams.get('to') ?? undefined,
     userId: searchParams.get('userId') ?? undefined,
     actionType: searchParams.get('actionType') ?? undefined,
     riskLevel: searchParams.get('riskLevel') ?? undefined,
-  });
-  const users = getUsers(user.organizationId);
+    module: searchParams.get('module') ?? undefined,
+  };
+  const events = getAuditFeed(user.organizationId, filters);
+  const activityLogs = getUserActivityLogs(filters);
+  const users = getUsers();
   const rules = getAuditAlertRules(user.organizationId);
-  return NextResponse.json({ events, users, rules });
+  return NextResponse.json({ events, activityLogs, users, rules });
 });
 
 export const POST = withAuth(async (req, user) => {
