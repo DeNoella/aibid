@@ -43,13 +43,15 @@ export async function registerUser(name: string, email: string, password: string
   const stageStmt = db.prepare('INSERT INTO pipeline_stages (id, organization_id, name, position, probability, color, is_won, is_lost) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
   for (const s of stages) stageStmt.run(uuid(), orgId, ...s);
 
-  const avatarUrl = saveGeneratedAvatar(userId, name.trim(), userId);
+  const avatarUrl = saveGeneratedAvatar(userId, { seed: userId });
 
-  try {
-    await EmailService.sendWelcomeEmail(normalizedEmail, name.trim());
-  } catch {
-    // Registration should succeed even if welcome email fails.
-  }
+  // Send welcome email asynchronously so registration response is not blocked
+  // by SMTP latency (can be several seconds).
+  setImmediate(() => {
+    EmailService.sendWelcomeEmail(normalizedEmail, name.trim()).catch(() => {
+      // Swallow errors - the welcome email is best-effort.
+    });
+  });
 
   const token = signToken({ userId, email: normalizedEmail, role, organizationId: orgId });
   return {

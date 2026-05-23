@@ -6,15 +6,15 @@ import { ParticleCanvas } from '@/components/ParticleCanvas';
 import { useRouter } from 'next/navigation';
 
 export default function OnboardingProfilePage() {
-  const { user, updateUser, refreshUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const router = useRouter();
 
   if (!user) {
     return null;
   }
 
-  const finish = async () => {
-    await refreshUser();
+  const finish = () => {
+    updateUser({ profileSetupCompleted: true });
     router.push(user.role === 'admin' ? '/admin/overview' : '/dashboard');
   };
 
@@ -26,7 +26,7 @@ export default function OnboardingProfilePage() {
           <ProfilePictureSetup
             user={user}
             showSkip
-            onAvatarUpdated={(avatarUrl) => updateUser({ avatarUrl, profileSetupCompleted: false })}
+            onAvatarUpdated={(avatarUrl) => updateUser({ avatarUrl })}
             onComplete={finish}
           />
         </div>

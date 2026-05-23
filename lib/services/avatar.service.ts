@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { getDb } from '@/lib/db';
-import { buildAvatarSvg } from '@/lib/utils/avatar-generator';
+import {
+  AvatarGender,
+  buildMemojiSvg,
+  svgToDataUrl,
+} from '@/lib/utils/avatar-generator';
 
 const AVATAR_DIR = path.resolve(process.cwd(), 'public', 'uploads', 'avatars');
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
@@ -15,7 +19,11 @@ function removeExistingAvatars(userId: string) {
   if (!fs.existsSync(AVATAR_DIR)) return;
   for (const file of fs.readdirSync(AVATAR_DIR)) {
     if (file.startsWith(`${userId}.`) || file.startsWith(`${userId}-`)) {
-      fs.unlinkSync(path.join(AVATAR_DIR, file));
+      try {
+        fs.unlinkSync(path.join(AVATAR_DIR, file));
+      } catch {
+        // Ignore - file may have already been removed
+      }
     }
   }
 }
@@ -33,17 +41,29 @@ function extensionForMime(mime: string): string {
   }
 }
 
-export function saveGeneratedAvatar(userId: string, name: string, seed?: string) {
-  ensureAvatarDir();
-  removeExistingAvatars(userId);
-
-  const svg = buildAvatarSvg(name, seed ?? userId);
-  const filename = `${userId}.svg`;
-  fs.writeFileSync(path.join(AVATAR_DIR, filename), svg, 'utf8');
-
-  const avatarUrl = `/uploads/avatars/${filename}?v=${Date.now()}`;
+function persistAvatarUrl(userId: string, avatarUrl: string) {
   const db = getDb();
   db.prepare("UPDATE users SET avatar_url = ?, updated_at = datetime('now') WHERE id = ?").run(avatarUrl, userId);
+}
+
+/**
+ * Generate a system avatar and store it as a data URL directly in the database.
+ * This avoids any filesystem I/O so it is instant even on slow disks (e.g. OneDrive).
+ */
+export function saveGeneratedAvatar(
+  userId: string,
+  options: { gender?: AvatarGender; seed?: string } = {}
+): string {
+  const svg = buildMemojiSvg({
+    gender: options.gender ?? 'female',
+    seed: options.seed ?? userId,
+  });
+  const avatarUrl = svgToDataUrl(svg);
+
+  // Stored avatars from previous file-based generation are still cleaned up so
+  // we never leave orphaned files behind.
+  removeExistingAvatars(userId);
+  persistAvatarUrl(userId, avatarUrl);
   return avatarUrl;
 }
 
@@ -63,8 +83,7 @@ export function saveUploadedAvatar(userId: string, buffer: Buffer, mimeType: str
   fs.writeFileSync(path.join(AVATAR_DIR, filename), buffer);
 
   const avatarUrl = `/uploads/avatars/${filename}?v=${Date.now()}`;
-  const db = getDb();
-  db.prepare("UPDATE users SET avatar_url = ?, updated_at = datetime('now') WHERE id = ?").run(avatarUrl, userId);
+  persistAvatarUrl(userId, avatarUrl);
   return avatarUrl;
 }
 

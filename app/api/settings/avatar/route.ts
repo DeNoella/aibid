@@ -18,7 +18,8 @@ export const POST = withAuth(async (request: NextRequest, user) => {
 
       const buffer = Buffer.from(await file.arrayBuffer());
       const avatarUrl = saveUploadedAvatar(user.userId, buffer, file.type || 'image/jpeg');
-      return NextResponse.json({ avatarUrl, user: getUserById(user.userId) });
+      const profile = getUserById(user.userId);
+      return NextResponse.json({ avatarUrl, user: profile ? { ...profile, avatarUrl } : null });
     }
 
     const body = await request.json();
@@ -31,7 +32,8 @@ export const POST = withAuth(async (request: NextRequest, user) => {
       const mimeType = match[1];
       const buffer = Buffer.from(match[2], 'base64');
       const avatarUrl = saveUploadedAvatar(user.userId, buffer, mimeType);
-      return NextResponse.json({ avatarUrl, user: getUserById(user.userId) });
+      const profile = getUserById(user.userId);
+      return NextResponse.json({ avatarUrl, user: profile ? { ...profile, avatarUrl } : null });
     }
 
     return NextResponse.json({ error: 'No image provided.' }, { status: 400 });

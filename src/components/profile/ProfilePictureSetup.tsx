@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Camera, ImageUp, RefreshCw, Sparkles, Upload } from 'lucide-react';
+import { Camera, ImageUp, RefreshCw, Sparkles, Upload, User as UserIcon, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { UserAvatar } from '@/components/profile/UserAvatar';
@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { cn } from '@/components/ui/utils';
 import type { User } from '@/contexts/AuthContext';
 
-type SetupMode = 'upload' | 'camera' | 'generate';
+type SetupMode = 'generate' | 'upload' | 'camera';
+type Gender = 'female' | 'male';
 
 interface ProfilePictureSetupProps {
   user: User;
@@ -32,6 +33,7 @@ export function ProfilePictureSetup({
   completeLabel,
 }: ProfilePictureSetupProps) {
   const [mode, setMode] = useState<SetupMode>('generate');
+  const [gender, setGender] = useState<Gender>('female');
   const [previewUrl, setPreviewUrl] = useState<string | null>(user.avatarUrl ?? null);
   const [busy, setBusy] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
@@ -87,20 +89,45 @@ export function ProfilePictureSetup({
     } else {
       stopCamera();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
+
+  const applyAvatar = (avatarUrl: string) => {
+    setPreviewUrl(avatarUrl);
+    onAvatarUpdated?.(avatarUrl);
+  };
+
+  const generateAvatar = async (chosenGender: Gender) => {
+    setBusy(true);
+    try {
+      const result = await api.post<{ avatarUrl: string }>('/settings/avatar/generate', {
+        gender: chosenGender,
+        seed: `${user.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      });
+      applyAvatar(result.avatarUrl);
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : 'Could not generate avatar.';
+      toast.error(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleGenderChange = (next: Gender) => {
+    if (next === gender) return;
+    setGender(next);
+    void generateAvatar(next);
+  };
 
   const uploadImageData = async (imageData: string) => {
     setBusy(true);
     try {
       const result = await api.post<{ avatarUrl: string }>('/settings/avatar', { imageData });
-      setPreviewUrl(result.avatarUrl);
-      onAvatarUpdated?.(result.avatarUrl);
+      applyAvatar(result.avatarUrl);
       toast.success('Profile picture updated');
-      return result.avatarUrl;
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Could not upload profile picture.';
       toast.error(message);
-      return null;
     } finally {
       setBusy(false);
     }
@@ -127,8 +154,7 @@ export function ProfilePictureSetup({
       if (!response.ok) {
         throw new ApiError(result.error || 'Upload failed', response.status);
       }
-      setPreviewUrl(result.avatarUrl);
-      onAvatarUpdated?.(result.avatarUrl);
+      applyAvatar(result.avatarUrl);
       toast.success('Profile picture updated');
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Could not upload profile picture.';
@@ -151,23 +177,6 @@ export function ProfilePictureSetup({
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = canvas.toDataURL('image/jpeg', 0.92);
     await uploadImageData(imageData);
-  };
-
-  const generateAvatar = async () => {
-    setBusy(true);
-    try {
-      const result = await api.post<{ avatarUrl: string }>('/settings/avatar/generate', {
-        seed: `${user.name}-${Date.now()}`,
-      });
-      setPreviewUrl(result.avatarUrl);
-      onAvatarUpdated?.(result.avatarUrl);
-      toast.success('Generated a new system avatar');
-    } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Could not generate avatar.';
-      toast.error(message);
-    } finally {
-      setBusy(false);
-    }
   };
 
   const finishSetup = async () => {
@@ -197,14 +206,14 @@ export function ProfilePictureSetup({
         <UserAvatar
           name={user.name}
           avatarUrl={previewUrl}
-          className={cn('h-24 w-24', compact && 'h-20 w-20')}
+          className={cn('h-28 w-28', compact && 'h-24 w-24')}
           fallbackClassName="text-lg"
         />
         <h2 className={cn('mt-4 font-serif text-2xl font-bold text-foreground', compact && 'text-xl')}>
           {compact ? 'Profile Picture' : 'Set up your profile picture'}
         </h2>
         <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          Upload a photo, take one with your camera, or use a generated AIBID avatar.
+          Choose a generated AIBID avatar, upload a photo, or take one with your camera.
         </p>
       </div>
 
@@ -226,6 +235,48 @@ export function ProfilePictureSetup({
       </div>
 
       <div className="mt-6 space-y-4">
+        {mode === 'generate' && (
+          <div className="space-y-4 rounded-xl border border-border bg-secondary/20 p-5 text-center">
+            <p className="text-sm text-muted-foreground">
+              Pick a style and we will generate a unique cartoon avatar. Regenerate as many times as you like.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 rounded-xl bg-secondary/60 p-1">
+              {[
+                { id: 'female' as const, label: 'Female', icon: UserIcon },
+                { id: 'male' as const, label: 'Male', icon: Users },
+              ].map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => handleGenderChange(id)}
+                  className={cn(
+                    'flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors',
+                    gender === id
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={busy}
+              onClick={() => void generateAvatar(gender)}
+            >
+              <RefreshCw className={cn('mr-2 h-4 w-4', busy && 'animate-spin')} />
+              Generate New Avatar
+            </Button>
+          </div>
+        )}
+
         {mode === 'upload' && (
           <div className="rounded-xl border border-dashed border-border bg-secondary/20 p-6 text-center">
             <ImageUp className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
@@ -268,31 +319,20 @@ export function ProfilePictureSetup({
             </div>
           </div>
         )}
+      </div>
 
-        {mode === 'generate' && (
-          <div className="rounded-xl border border-border bg-secondary/20 p-6 text-center">
-            <Sparkles className="mx-auto mb-3 h-8 w-8 text-brand" />
-            <p className="mb-4 text-sm text-muted-foreground">
-              We can generate a unique avatar from your name. You can regenerate it anytime.
-            </p>
-            <Button type="button" variant="outline" disabled={busy} onClick={() => void generateAvatar()}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Generate New Avatar
+      {(showSkip || onComplete) && (
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          {showSkip && (
+            <Button type="button" variant="outline" className="flex-1" disabled={busy} onClick={() => void finishSetup()}>
+              Use System Avatar
             </Button>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        {showSkip && (
-          <Button type="button" variant="outline" className="flex-1" disabled={busy} onClick={() => void finishSetup()}>
-            Use System Avatar
+          )}
+          <Button type="button" className="flex-1" disabled={busy} onClick={() => void finishSetup()}>
+            {completeLabel ?? (compact ? 'Save Profile Picture' : 'Continue to Dashboard')}
           </Button>
-        )}
-        <Button type="button" className="flex-1" disabled={busy} onClick={() => void finishSetup()}>
-          {completeLabel ?? (compact ? 'Save Profile Picture' : 'Continue to Dashboard')}
-        </Button>
-      </div>
+        </div>
+      )}
     </Card>
   );
 }
