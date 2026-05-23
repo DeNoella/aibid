@@ -4,6 +4,7 @@ import { hashPassword, comparePassword } from '@/lib/auth';
 import { signToken } from '@/lib/auth';
 import { MfaService } from '@/lib/services/mfa.service';
 import { EmailService } from '@/lib/services/email.service';
+import { saveGeneratedAvatar } from '@/lib/services/avatar.service';
 import {
   AppError,
   assertEmailAvailable,
@@ -13,7 +14,7 @@ import {
   validatePassword,
 } from '@/lib/validation';
 
-export function registerUser(name: string, email: string, password: string, organization: string) {
+export async function registerUser(name: string, email: string, password: string, organization: string) {
   const db = getDb();
   const role = 'analyst';
   const subscriptionStatus = 'free_trial';
@@ -26,8 +27,8 @@ export function registerUser(name: string, email: string, password: string, orga
   const userId = uuid();
 
   db.prepare('INSERT INTO organizations (id, name) VALUES (?, ?)').run(orgId, organization.trim() || 'My Organization');
-  db.prepare('INSERT INTO users (id, organization_id, email, password_hash, name, role, subscription_status) VALUES (?, ?, ?, ?, ?, ?, ?)').run(
-    userId, orgId, normalizedEmail, hashPassword(password), name.trim(), role, subscriptionStatus
+  db.prepare('INSERT INTO users (id, organization_id, email, password_hash, name, role, subscription_status, profile_setup_completed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+    userId, orgId, normalizedEmail, hashPassword(password), name.trim(), role, subscriptionStatus, 0
   );
   db.prepare('INSERT INTO user_preferences (id, user_id) VALUES (?, ?)').run(uuid(), userId);
 
@@ -42,10 +43,27 @@ export function registerUser(name: string, email: string, password: string, orga
   const stageStmt = db.prepare('INSERT INTO pipeline_stages (id, organization_id, name, position, probability, color, is_won, is_lost) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
   for (const s of stages) stageStmt.run(uuid(), orgId, ...s);
 
+  const avatarUrl = saveGeneratedAvatar(userId, name.trim(), userId);
+
+  try {
+    await EmailService.sendWelcomeEmail(normalizedEmail, name.trim());
+  } catch {
+    // Registration should succeed even if welcome email fails.
+  }
+
   const token = signToken({ userId, email: normalizedEmail, role, organizationId: orgId });
   return {
     token,
-    user: { id: userId, name: name.trim(), email: normalizedEmail, role, subscriptionStatus, organizationId: orgId }
+    user: {
+      id: userId,
+      name: name.trim(),
+      email: normalizedEmail,
+      role,
+      subscriptionStatus,
+      organizationId: orgId,
+      avatarUrl,
+      profileSetupCompleted: false,
+    },
   };
 }
 
@@ -93,7 +111,7 @@ export async function loginUser(email: string, password: string) {
 
 export function getUserById(userId: string) {
   const db = getDb();
-  const user = db.prepare('SELECT id, email, name, role, subscription_status, organization_id, avatar_url, two_factor_enabled, created_at FROM users WHERE id = ?').get(userId) as any;
+  const user = db.prepare('SELECT id, email, name, role, subscription_status, organization_id, avatar_url, two_factor_enabled, created_at, profile_setup_completed FROM users WHERE id = ?').get(userId) as any;
   if (!user) return null;
   return {
     id: user.id,
@@ -104,7 +122,8 @@ export function getUserById(userId: string) {
     organizationId: user.organization_id,
     avatarUrl: user.avatar_url,
     twoFactorEnabled: !!user.two_factor_enabled,
-    createdAt: user.created_at
+    createdAt: user.created_at,
+    profileSetupCompleted: !!user.profile_setup_completed,
   };
 }
 

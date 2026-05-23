@@ -5,13 +5,28 @@ import { TopNav } from '@/components/layout/TopNav';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { MaintenanceOverlay } from '@/components/layout/MaintenanceOverlay';
 import { motion, AnimatePresence } from 'motion/react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+  const isOnboarding = pathname.startsWith('/onboarding');
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [loading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!loading && user && !user.profileSetupCompleted && !isOnboarding) {
+      router.replace('/onboarding/profile');
+    }
+  }, [loading, user, isOnboarding, router]);
+
+  if (loading || !isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-border border-t-brand rounded-full animate-spin" />
@@ -19,8 +34,8 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
+  if (isOnboarding) {
+    return <div className="min-h-screen bg-background overflow-x-hidden">{children}</div>;
   }
 
   return (

@@ -13,6 +13,7 @@ export function runMigrations(db: Database.Database) {
   safeExec(db, "ALTER TABLE users ADD COLUMN department TEXT");
   safeExec(db, "ALTER TABLE users ADD COLUMN last_login TEXT");
   safeExec(db, "ALTER TABLE users ADD COLUMN is_default_password INTEGER NOT NULL DEFAULT 0");
+  safeExec(db, "ALTER TABLE users ADD COLUMN profile_setup_completed INTEGER NOT NULL DEFAULT 1");
 
   // AI insights review fields
   safeExec(db, "ALTER TABLE ai_insights ADD COLUMN marked_as_false_positive INTEGER NOT NULL DEFAULT 0");

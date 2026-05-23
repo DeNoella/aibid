@@ -5,15 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, MailCheck } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 type MfaStatus = 'pending' | 'approved' | 'expired' | 'used';
 
-function setAuthCookie(token: string) {
-  document.cookie = `auth_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
-}
-
 function MfaPendingContent() {
   const router = useRouter();
+  const { setSession } = useAuth();
   const searchParams = useSearchParams();
   const attemptId = useMemo(() => searchParams.get('attemptId') ?? '', [searchParams]);
   const [status, setStatus] = useState<MfaStatus>('pending');
@@ -48,8 +46,7 @@ function MfaPendingContent() {
         }
 
         if (data.token) {
-          localStorage.setItem('auth_token', data.token);
-          setAuthCookie(data.token);
+          await setSession(data.token);
         }
 
         stopped = true;
@@ -92,7 +89,7 @@ function MfaPendingContent() {
       stopped = true;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [attemptId, router]);
+  }, [attemptId, router, setSession]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6">

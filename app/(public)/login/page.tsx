@@ -91,7 +91,7 @@ function AuthPageContent() {
     try {
       await register(formData.name, formData.email, formData.password, formData.organization);
       toast.success('Account created successfully!', { description: 'Welcome to AIBID' });
-      router.push('/dashboard');
+      router.push('/onboarding/profile');
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Please try again later.';
       toast.error('Registration failed', { description: message });

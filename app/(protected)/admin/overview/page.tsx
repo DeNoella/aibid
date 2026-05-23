@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ArrowRight,
   RefreshCw,
+  Server,
 } from 'lucide-react';
 
 interface ServiceHealth {

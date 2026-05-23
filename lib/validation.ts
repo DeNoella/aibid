@@ -88,7 +88,7 @@ export function getErrorStatus(error: unknown, fallback = 400): number {
 }
 
 type DbLike = {
-  prepare: (sql: string) => { get: (...args: unknown[]) => unknown };
+  prepare: (sql: string) => { get: (...args: any[]) => unknown };
 };
 
 export function assertEmailAvailable(db: DbLike, email: string, excludeUserId?: string): string {

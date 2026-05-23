@@ -3,11 +3,11 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Bell, LogOut, Menu, X } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { UserAvatar } from '@/components/profile/UserAvatar';
 import { cn } from '@/components/ui/utils';
 
 export const TopNav = () => {
@@ -72,11 +72,9 @@ export const TopNav = () => {
                   <p className="max-w-[140px] truncate text-sm font-medium text-foreground">{user?.name}</p>
                   <p className="text-xs capitalize text-muted-foreground">{user?.role}</p>
                 </div>
-                <Avatar className="h-8 w-8 border border-border/60">
-                  <AvatarFallback className="bg-secondary text-xs text-foreground">
-                    {user?.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
+                {user && (
+                  <UserAvatar name={user.name} avatarUrl={user.avatarUrl} className="h-8 w-8" />
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -120,11 +118,9 @@ export const TopNav = () => {
                     Notifications
                   </Link>
                   <div className="flex items-center gap-3 rounded-xl px-3 py-2">
-                    <Avatar className="h-8 w-8 border border-border/60">
-                      <AvatarFallback className="bg-secondary text-xs text-foreground">
-                        {user?.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
+                    {user && (
+                      <UserAvatar name={user.name} avatarUrl={user.avatarUrl} className="h-8 w-8" />
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">{user?.name}</p>
                       <p className="truncate text-xs text-muted-foreground">{user?.email}</p>

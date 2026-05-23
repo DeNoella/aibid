@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MfaService } from '@/lib/services/mfa.service';
 import { getDb } from '@/lib/db';
 import { signToken } from '@/lib/auth';
+import { getUserById } from '@/lib/services/auth.service';
+import { isProfileSetupComplete } from '@/lib/services/avatar.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,17 +49,18 @@ export async function POST(request: NextRequest) {
       request.headers.get('user-agent')
     );
 
-    const redirectPath = user.role === 'admin' ? '/admin/overview' : '/dashboard';
+    const redirectPath = !isProfileSetupComplete(user.id)
+      ? '/onboarding/profile'
+      : user.role === 'admin'
+        ? '/admin/overview'
+        : '/dashboard';
+
+    const profile = getUserById(user.id);
 
     const response = NextResponse.json({
       token: jwt,
       redirectPath,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      user: profile,
     });
 
     response.cookies.set('auth_token', jwt, {

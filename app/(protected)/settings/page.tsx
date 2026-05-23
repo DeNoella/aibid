@@ -13,6 +13,8 @@ import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { api, ApiError } from '@/services/api';
 import { getPasswordErrors } from '@/utils/validation';
+import { ProfilePictureSetup } from '@/components/profile/ProfilePictureSetup';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Profile {
   id: string;
@@ -34,6 +36,7 @@ interface Preferences {
 }
 
 export default function SettingsPage() {
+  const { user, updateUser, refreshUser } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [profileForm, setProfileForm] = useState({ name: '', email: '', organizationName: '' });
@@ -135,6 +138,22 @@ export default function SettingsPage() {
 
         {/* Profile Settings */}
         <TabsContent value="profile" className="space-y-4">
+          {user && (
+            <ProfilePictureSetup
+              user={user}
+              compact
+              markSetupComplete={false}
+              onAvatarUpdated={(avatarUrl) => {
+                updateUser({ avatarUrl });
+                setProfile((current) => (current ? { ...current } : current));
+              }}
+              onComplete={() => {
+                void refreshUser();
+                toast.success('Profile picture saved');
+              }}
+              completeLabel="Done"
+            />
+          )}
           <Card className="p-4 sm:p-6">
             <div className="flex items-center gap-4 mb-6">
               <User className="w-5 h-5 text-muted-foreground" />

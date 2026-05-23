@@ -135,4 +135,70 @@ export class EmailService {
       html,
     });
   }
+
+  static async sendWelcomeEmail(email: string, name: string) {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const loginUrl = `${baseUrl}/login`;
+
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = Number(process.env.SMTP_PORT || '587');
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+    const smtpFrom = process.env.SMTP_FROM || 'AIBID <no-reply@aibid.local>';
+
+    if (!smtpHost || !smtpUser || !smtpPass) {
+      return;
+    }
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to AIBID</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; padding: 24px; background-color: #0d1117; color: #ffffff; font-family: 'Inter', Arial, sans-serif; }
+    .card { max-width: 520px; margin: 0 auto; background: #161b22; border: 1px solid #30363d; border-radius: 16px; overflow: hidden; }
+    .header { padding: 28px 24px 20px; text-align: center; border-bottom: 1px solid #30363d; background: #0d1117; }
+    .logo { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; margin: 0 0 6px 0; }
+    .tagline { margin: 0; color: #8b949e; font-size: 13px; }
+    .content { padding: 28px 24px; text-align: center; }
+    .title { margin: 0 0 10px 0; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; }
+    .text { margin: 0 0 24px 0; color: #8b949e; font-size: 15px; line-height: 1.6; }
+    .btn { display: inline-block; padding: 12px 28px; border-radius: 10px; background: #f0883e; color: #0d1117 !important; text-decoration: none; font-weight: 600; font-size: 15px; }
+    .footer { font-size: 12px; color: #8b949e; padding: 16px 24px; text-align: center; border-top: 1px solid #30363d; background: #0d1117; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <p class="logo">AIBID</p>
+      <p class="tagline">Analytics Platform</p>
+    </div>
+    <div class="content">
+      <h2 class="title">Welcome, ${name}!</h2>
+      <p class="text">Your AIBID account has been created successfully. When you sign in, you will be guided to choose a profile picture or use a generated AIBID avatar before entering the dashboard.</p>
+      <a href="${loginUrl}" class="btn">Sign In to AIBID</a>
+    </div>
+    <div class="footer">&copy; ${new Date().getFullYear()} AIBID CRM Platform</div>
+  </div>
+</body>
+</html>`;
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: { user: smtpUser, pass: smtpPass },
+    });
+
+    await transporter.sendMail({
+      from: smtpFrom,
+      to: email,
+      subject: 'AIBID — Welcome to your new account',
+      html,
+    });
+  }
 }
