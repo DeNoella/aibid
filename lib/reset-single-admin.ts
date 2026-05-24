@@ -32,7 +32,7 @@ function resetToSingleAdmin() {
     db.prepare(
       `INSERT INTO users (id, organization_id, email, password_hash, name, role, subscription_status, is_active)
        VALUES (?, ?, ?, ?, ?, 'admin', 'premium', 1)`
-    ).run(targetId, orgId, TARGET_EMAIL, bcrypt.hashSync('password123', 10), 'System Admin');
+    ).run(targetId, orgId, TARGET_EMAIL, bcrypt.hashSync('Business1!', 10), 'System Admin');
     db.prepare('INSERT INTO user_preferences (id, user_id) VALUES (?, ?)').run(uuid(), targetId);
     created = true;
   }
