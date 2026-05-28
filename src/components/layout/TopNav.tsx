@@ -6,7 +6,8 @@ import { Bell, LogOut, Menu, Settings, User as UserIcon, X } from 'lucide-react'
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { api } from '@/services/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,10 +24,12 @@ import { cn } from '@/components/ui/utils';
 export const TopNav = () => {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileTab, setProfileTab] = useState<'details' | 'avatar'>('details');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -34,6 +37,28 @@ export const TopNav = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await api.get<{ count: number }>('/notifications/unread-count');
+        if (!cancelled) setUnreadCount(res.count);
+      } catch {
+        if (!cancelled) setUnreadCount(0);
+      }
+    };
+    load();
+    const interval = setInterval(load, 15000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [user, pathname]);
 
   const openProfile = (tab: 'details' | 'avatar') => {
     setProfileTab(tab);
@@ -80,9 +105,13 @@ export const TopNav = () => {
                   className="relative hidden h-9 w-9 rounded-xl text-muted-foreground hover:bg-secondary/80 hover:text-foreground md:flex"
                   asChild
                 >
-                  <Link href="/notifications">
+                  <Link href="/notifications" aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}>
                     <Bell className="h-4 w-4" />
-                    <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-brand" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-background">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 </Button>
 
@@ -166,7 +195,12 @@ export const TopNav = () => {
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-foreground"
                     >
                       <Bell className="h-4 w-4" />
-                      Notifications
+                      <span className="flex-1">Notifications</span>
+                      {unreadCount > 0 && (
+                        <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold text-background">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
                     </Link>
                     {user && (
                       <button

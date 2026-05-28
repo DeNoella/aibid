@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/api-auth';
 import { v4 as uuid } from 'uuid';
 import { getDb } from '@/lib/db';
 import { createAuditLog } from '@/lib/services/audit-logs.service';
+import { notifyAdmins } from '@/lib/services/notifications.service';
 
 export const GET = withAuth(async (req, user) => {
   requireRole(user, 'analyst');
@@ -44,7 +45,15 @@ export const POST = withAuth(async (req, user) => {
       Math.floor(Math.random() * 5000000) + 100000, JSON.stringify(body.preview ?? {})
     );
     const userRow = db.prepare('SELECT name FROM users WHERE id = ?').get(user.userId) as { name: string };
-    createAuditLog(user.organizationId, user.userId, userRow.name, 'Report download', 'Reports', `Generated report: ${title}`);
+    createAuditLog(user.organizationId, user.userId, userRow.name, 'Report generated', 'Reports', `Generated report: ${title}`);
+    notifyAdmins(user.organizationId, {
+      priority: 'LOW',
+      title: 'Report generated',
+      message: `${userRow.name} generated the report "${title}".`,
+      linkUrl: '/admin/audit',
+      actorName: userRow.name,
+      actionLabel: 'Report generated',
+    });
     return NextResponse.json({ reportId: id, preview: body.preview });
   }
 

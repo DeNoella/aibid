@@ -14,7 +14,10 @@ export const POST = withAuth(async (req, user) => {
   notifyAdmins(user.organizationId, {
     priority: 'MEDIUM',
     title: 'New data uploaded',
-    message: `${userRow.name} uploaded data for ${body.category} category. Quality score: ${body.qualityScore}%`,
+    message: `${userRow.name} uploaded ${body.fileName ?? 'data'} (${body.rowCount ?? '?'} rows) to ${body.category}. Quality score: ${body.qualityScore}%`,
+    linkUrl: '/admin/datasources',
+    actorName: userRow.name,
+    actionLabel: 'Data upload',
   });
 
   db.prepare(`INSERT INTO audit_logs (id, organization_id, user_id, user_name, action, module, details) VALUES (?, ?, ?, ?, 'Data upload', 'Data Management', ?)`).run(

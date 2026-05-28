@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { v4 as uuid } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { getDb } from '@/lib/db';
@@ -41,9 +43,201 @@ function ensureServiceHealth(db: ReturnType<typeof getDb>, orgId: string) {
   }
 }
 
+/**
+ * Refresh auto-generated admin tasks based on the current system state.
+ * Each system task has a stable `system_key` so we can keep one open at a
+ * time and resolve it automatically once the underlying condition is gone.
+ */
+function syncSystemTasks(db: ReturnType<typeof getDb>, orgId: string) {
+  type SystemTask = { key: string; title: string; description: string; priority: 'low' | 'medium' | 'high'; condition: boolean };
+
+  const pendingRoleAssignment = db.prepare(
+    "SELECT COUNT(*) as c FROM users WHERE organization_id = ? AND role = 'analyst' AND department IS NULL AND is_active = 1"
+  ).get(orgId) as { c: number };
+
+  const staleSources = db.prepare(
+    "SELECT COUNT(*) as c FROM data_sources WHERE organization_id = ? AND (last_synced_at IS NULL OR last_synced_at < datetime('now', '-24 hours'))"
+  ).get(orgId) as { c: number };
+
+  const failedBackups = db.prepare(
+    "SELECT COUNT(*) as c FROM backup_records WHERE organization_id = ? AND status = 'failed' AND created_at >= datetime('now', '-7 days')"
+  ).get(orgId) as { c: number };
+
+  const lowAccModels = db.prepare(
+    "SELECT COUNT(*) as c FROM predictive_model WHERE organization_id = ? AND (current_accuracy < 0.8 OR status != 'Healthy')"
+  ).get(orgId) as { c: number };
+
+  const tasks: SystemTask[] = [
+    {
+      key: 'role_assignment',
+      title: 'Assign departments to analysts',
+      description: `${pendingRoleAssignment.c} analyst account${pendingRoleAssignment.c === 1 ? ' is' : 's are'} missing a department. Assign one from the Users page so dashboards can scope correctly.`,
+      priority: 'medium',
+      condition: pendingRoleAssignment.c > 0,
+    },
+    {
+      key: 'stale_sources',
+      title: 'Refresh stale data sources',
+      description: `${staleSources.c} data source${staleSources.c === 1 ? ' has' : 's have'} not synced in over 24 hours. Open Data Sources to trigger a sync.`,
+      priority: 'high',
+      condition: staleSources.c > 0,
+    },
+    {
+      key: 'failed_backups',
+      title: 'Investigate failed backups',
+      description: `${failedBackups.c} backup${failedBackups.c === 1 ? '' : 's'} failed in the last 7 days. Review Backup & Restore and trigger a manual backup.`,
+      priority: 'high',
+      condition: failedBackups.c > 0,
+    },
+    {
+      key: 'low_accuracy_models',
+      title: 'Review AI model accuracy',
+      description: `${lowAccModels.c} model${lowAccModels.c === 1 ? ' is' : 's are'} below 80% accuracy or not healthy. Open AI Model Health to retrain.`,
+      priority: 'medium',
+      condition: lowAccModels.c > 0,
+    },
+  ];
+
+  const upsert = db.prepare(`
+    INSERT INTO admin_tasks (id, organization_id, title, description, status, priority, source, system_key)
+    VALUES (?, ?, ?, ?, 'open', ?, 'system', ?)
+    ON CONFLICT(system_key) DO UPDATE SET
+      title = excluded.title,
+      description = excluded.description,
+      priority = excluded.priority,
+      status = CASE WHEN admin_tasks.status = 'done' THEN 'open' ELSE admin_tasks.status END,
+      updated_at = datetime('now')
+  `);
+  const resolve = db.prepare(
+    "UPDATE admin_tasks SET status = 'done', completed_at = datetime('now'), updated_at = datetime('now') WHERE organization_id = ? AND system_key = ? AND status != 'done'"
+  );
+
+  for (const t of tasks) {
+    if (t.condition) {
+      upsert.run(uuid(), orgId, t.title, t.description, t.priority, t.key);
+    } else {
+      resolve.run(orgId, t.key);
+    }
+  }
+}
+
+export interface AdminTaskRow {
+  id: string;
+  organization_id: string;
+  title: string;
+  description: string | null;
+  status: 'open' | 'in_progress' | 'done';
+  priority: 'low' | 'medium' | 'high';
+  due_date: string | null;
+  source: 'manual' | 'system';
+  system_key: string | null;
+  created_by: string | null;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
+
+export function listAdminTasks(orgId: string, status?: 'open' | 'in_progress' | 'done' | 'all'): AdminTaskRow[] {
+  const db = getDb();
+  syncSystemTasks(db, orgId);
+  let where = 'WHERE organization_id = ?';
+  const params: unknown[] = [orgId];
+  if (status && status !== 'all') {
+    where += ' AND status = ?';
+    params.push(status);
+  }
+  return db.prepare(`
+    SELECT * FROM admin_tasks ${where}
+    ORDER BY CASE status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 ELSE 2 END,
+             CASE priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END,
+             due_date IS NULL, due_date,
+             created_at DESC
+  `).all(...params) as AdminTaskRow[];
+}
+
+export function createAdminTask(orgId: string, adminId: string, data: { title: string; description?: string; priority?: 'low' | 'medium' | 'high'; dueDate?: string }) {
+  const db = getDb();
+  if (!data.title?.trim()) {
+    throw new AppError('Task title is required.');
+  }
+  const id = uuid();
+  db.prepare(`
+    INSERT INTO admin_tasks (id, organization_id, title, description, priority, due_date, source, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, 'manual', ?)
+  `).run(
+    id,
+    orgId,
+    data.title.trim(),
+    data.description?.trim() || null,
+    data.priority ?? 'medium',
+    data.dueDate || null,
+    adminId
+  );
+  return id;
+}
+
+export function updateAdminTask(orgId: string, taskId: string, data: { title?: string; description?: string; priority?: 'low' | 'medium' | 'high'; status?: 'open' | 'in_progress' | 'done'; dueDate?: string | null }) {
+  const db = getDb();
+  const existing = db.prepare('SELECT id, status, source FROM admin_tasks WHERE id = ? AND organization_id = ?').get(taskId, orgId) as { id: string; status: string; source: string } | undefined;
+  if (!existing) {
+    throw new AppError('Task not found.', 404);
+  }
+  const nowDone = data.status === 'done' && existing.status !== 'done';
+  const reopened = data.status && data.status !== 'done' && existing.status === 'done';
+
+  db.prepare(`
+    UPDATE admin_tasks SET
+      title       = COALESCE(?, title),
+      description = COALESCE(?, description),
+      priority    = COALESCE(?, priority),
+      status      = COALESCE(?, status),
+      due_date    = CASE WHEN ? = 1 THEN ? ELSE due_date END,
+      completed_at = CASE WHEN ? = 1 THEN datetime('now') WHEN ? = 1 THEN NULL ELSE completed_at END,
+      updated_at  = datetime('now')
+    WHERE id = ? AND organization_id = ?
+  `).run(
+    data.title?.trim() ?? null,
+    data.description !== undefined ? (data.description?.trim() || null) : null,
+    data.priority ?? null,
+    data.status ?? null,
+    data.dueDate !== undefined ? 1 : 0,
+    data.dueDate ?? null,
+    nowDone ? 1 : 0,
+    reopened ? 1 : 0,
+    taskId,
+    orgId
+  );
+}
+
+export function deleteAdminTask(orgId: string, taskId: string) {
+  const db = getDb();
+  const existing = db.prepare('SELECT id, source FROM admin_tasks WHERE id = ? AND organization_id = ?').get(taskId, orgId) as { id: string; source: string } | undefined;
+  if (!existing) {
+    throw new AppError('Task not found.', 404);
+  }
+  if (existing.source === 'system') {
+    throw new AppError('System-generated tasks resolve automatically. Mark them as done to dismiss.', 400);
+  }
+  db.prepare('DELETE FROM admin_tasks WHERE id = ? AND organization_id = ?').run(taskId, orgId);
+}
+
 export function getAdminOverview(orgId: string) {
   const db = getDb();
   ensureServiceHealth(db, orgId);
+  syncSystemTasks(db, orgId);
+
+  const totalUsers = db.prepare(
+    'SELECT COUNT(*) as count FROM users WHERE organization_id = ? AND is_active = 1'
+  ).get(orgId) as { count: number };
+
+  const totalUsersAll = db.prepare(
+    'SELECT COUNT(*) as count FROM users WHERE organization_id = ?'
+  ).get(orgId) as { count: number };
+
+  const newUsersToday = db.prepare(
+    "SELECT COUNT(*) as count FROM users WHERE organization_id = ? AND date(created_at) = date('now')"
+  ).get(orgId) as { count: number };
 
   const activeUsers = db.prepare(`
     SELECT COUNT(*) as count FROM users
@@ -58,19 +252,17 @@ export function getAdminOverview(orgId: string) {
     ORDER BY created_at DESC LIMIT 5
   `).all(orgId);
 
-  const pendingRoleAssignment = db.prepare(`
-    SELECT COUNT(*) as count FROM users WHERE organization_id = ? AND role = 'analyst' AND department IS NULL
-  `).get(orgId) as { count: number };
+  const openTasks = db.prepare(
+    "SELECT COUNT(*) as count FROM admin_tasks WHERE organization_id = ? AND status != 'done'"
+  ).get(orgId) as { count: number };
 
-  const staleSources = db.prepare(`
-    SELECT COUNT(*) as count FROM data_sources
-    WHERE organization_id = ? AND (last_synced_at IS NULL OR last_synced_at < datetime('now', '-24 hours'))
-  `).get(orgId) as { count: number };
-
-  const failedBackups = db.prepare(`
-    SELECT COUNT(*) as count FROM backup_records
-    WHERE organization_id = ? AND status = 'failed' AND created_at >= datetime('now', '-7 days')
-  `).get(orgId) as { count: number };
+  const recentActivity = db.prepare(`
+    SELECT id, user_name, action, module, details, created_at
+    FROM audit_logs
+    WHERE organization_id = ?
+    ORDER BY created_at DESC
+    LIMIT 8
+  `).all(orgId);
 
   const models = db.prepare('SELECT current_accuracy, status FROM predictive_model WHERE organization_id = ?').all(orgId) as { current_accuracy: number; status: string }[];
   let aiStatus = 'All healthy';
@@ -83,24 +275,19 @@ export function getAdminOverview(orgId: string) {
     aiStatusColor = 'amber';
   }
 
-  const dbSize = db.prepare("SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()").get() as { size: number };
-  const storageGb = (dbSize.size / (1024 ** 3)).toFixed(2);
-  const storagePct = Math.min(95, Math.round((dbSize.size / (5 * 1024 ** 3)) * 100));
-
   return {
     uptimePct: 99.7,
+    totalUsers: totalUsers.count,
+    totalUsersAll: totalUsersAll.count,
+    newUsersToday: newUsersToday.count,
     activeUsers: activeUsers.count,
+    openTasks: openTasks.count,
     aiStatus,
     aiStatusColor,
-    storageUsedPct: storagePct,
-    storageUsedGb: storageGb,
     services,
     criticalAlerts,
-    pendingTasks: {
-      roleAssignment: pendingRoleAssignment.count,
-      staleSources: staleSources.count,
-      failedBackups: failedBackups.count,
-    },
+    recentActivity,
+    serverTime: new Date().toISOString(),
   };
 }
 
@@ -470,21 +657,129 @@ export function saveAuditAlertRule(adminId: string, data: { conditionDescription
   return id;
 }
 
+const BACKUP_DIR = path.resolve(process.cwd(), 'data', 'backups');
+const DB_PATH = path.resolve(process.cwd(), 'data', 'crm.db');
+
+function ensureBackupDir() {
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+}
+
+function backupFilePath(id: string) {
+  return path.join(BACKUP_DIR, `${id}.db`);
+}
+
 export function getBackupSummary(orgId: string) {
   const db = getDb();
-  const last = db.prepare('SELECT * FROM backup_records WHERE organization_id = ? ORDER BY created_at DESC LIMIT 1').get(orgId);
-  const count = db.prepare("SELECT COUNT(*) as count FROM backup_records WHERE organization_id = ? AND created_at >= datetime('now', '-30 days')").get(orgId) as { count: number };
+  ensureBackupDir();
+
+  // Detect and reconcile any backup files that no longer exist on disk
+  // (e.g. file deleted manually).
+  const allRecords = db.prepare("SELECT id, status FROM backup_records WHERE organization_id = ?").all(orgId) as { id: string; status: string }[];
+  for (const rec of allRecords) {
+    const exists = fs.existsSync(backupFilePath(rec.id));
+    if (!exists && rec.status === 'completed') {
+      db.prepare("UPDATE backup_records SET status = 'missing' WHERE id = ?").run(rec.id);
+    }
+  }
+
+  const last = db.prepare("SELECT * FROM backup_records WHERE organization_id = ? AND status = 'completed' ORDER BY created_at DESC LIMIT 1").get(orgId);
+  const count = db.prepare("SELECT COUNT(*) as count FROM backup_records WHERE organization_id = ? AND status = 'completed' AND created_at >= datetime('now', '-30 days')").get(orgId) as { count: number };
   const schedule = db.prepare("SELECT value FROM system_config WHERE key = 'backup_schedule'").get() as { value: string } | undefined;
   const nextRun = db.prepare("SELECT value FROM system_config WHERE key = 'backup_next_run'").get() as { value: string } | undefined;
   const records = db.prepare("SELECT * FROM backup_records WHERE organization_id = ? AND created_at >= datetime('now', '-30 days') ORDER BY created_at DESC").all(orgId);
-  return { last, restorePoints: count.count, schedule: schedule?.value ? JSON.parse(schedule.value) : { frequency: 'daily', time: '02:00', emailConfirm: true }, nextRun: nextRun?.value ?? null, records, storageUsedGb: '2.4' };
+
+  // Calculate actual disk usage of backup files.
+  let totalBytes = 0;
+  try {
+    for (const file of fs.readdirSync(BACKUP_DIR)) {
+      const stat = fs.statSync(path.join(BACKUP_DIR, file));
+      if (stat.isFile()) totalBytes += stat.size;
+    }
+  } catch {
+    // Backup folder unavailable — fall through.
+  }
+  const storageUsedMb = (totalBytes / (1024 * 1024)).toFixed(2);
+
+  return {
+    last,
+    restorePoints: count.count,
+    schedule: schedule?.value ? JSON.parse(schedule.value) : { frequency: 'daily', time: '02:00', emailConfirm: true },
+    nextRun: nextRun?.value ?? null,
+    records,
+    storageUsedMb,
+  };
 }
 
+/**
+ * Take a real backup of the SQLite database. We use the official
+ * better-sqlite3 `backup()` API which yields a consistent snapshot
+ * even while the app is writing.
+ */
 export function createBackup(orgId: string, type: 'automatic' | 'manual' = 'manual') {
   const db = getDb();
+  ensureBackupDir();
   const id = uuid();
-  db.prepare('INSERT INTO backup_records (id, organization_id, backup_type, file_size, status) VALUES (?, ?, ?, ?, ?)').run(id, orgId, type, Math.floor(Math.random() * 500000000) + 100000000, 'completed');
+  const file = backupFilePath(id);
+
+  try {
+    // better-sqlite3 backup is synchronous and atomic for small DBs
+    // and async-streamed for larger ones; the simple fs.copy works
+    // for SQLite as long as WAL is checkpointed. Use the built-in
+    // backup API for safety.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (db as any).backup(file).then(() => {
+      const size = fs.statSync(file).size;
+      db.prepare("UPDATE backup_records SET file_size = ?, status = 'completed' WHERE id = ?").run(size, id);
+    }).catch(() => {
+      // Fallback: copy the live DB file. Acceptable for dev/local use.
+      try {
+        fs.copyFileSync(DB_PATH, file);
+        const size = fs.statSync(file).size;
+        db.prepare("UPDATE backup_records SET file_size = ?, status = 'completed' WHERE id = ?").run(size, id);
+      } catch {
+        db.prepare("UPDATE backup_records SET status = 'failed' WHERE id = ?").run(id);
+      }
+    });
+  } catch {
+    // Synchronous fallback for environments without backup()
+    try {
+      fs.copyFileSync(DB_PATH, file);
+    } catch {
+      db.prepare("INSERT INTO backup_records (id, organization_id, backup_type, file_size, status) VALUES (?, ?, ?, ?, ?)").run(id, orgId, type, 0, 'failed');
+      return id;
+    }
+  }
+
+  const initialSize = fs.existsSync(file) ? fs.statSync(file).size : 0;
+  db.prepare('INSERT INTO backup_records (id, organization_id, backup_type, file_size, status) VALUES (?, ?, ?, ?, ?)').run(
+    id, orgId, type, initialSize, 'completed'
+  );
   return id;
+}
+
+export function getBackupFile(orgId: string, backupId: string): { path: string; filename: string } | null {
+  const db = getDb();
+  const record = db
+    .prepare("SELECT id FROM backup_records WHERE id = ? AND organization_id = ?")
+    .get(backupId, orgId) as { id: string } | undefined;
+  if (!record) return null;
+  const file = backupFilePath(record.id);
+  if (!fs.existsSync(file)) return null;
+  return {
+    path: file,
+    filename: `aibid-backup-${backupId}.db`,
+  };
+}
+
+export function deleteBackup(orgId: string, backupId: string) {
+  const db = getDb();
+  const record = db.prepare('SELECT id FROM backup_records WHERE id = ? AND organization_id = ?').get(backupId, orgId) as { id: string } | undefined;
+  if (!record) {
+    throw new AppError('Backup not found.', 404);
+  }
+  const file = backupFilePath(record.id);
+  try { fs.unlinkSync(file); } catch { /* file may already be gone */ }
+  db.prepare('DELETE FROM backup_records WHERE id = ?').run(backupId);
 }
 
 export function getMaintenanceConfig() {
@@ -500,17 +795,6 @@ export function setMaintenanceMode(enabled: boolean, returnTime?: string) {
   if (returnTime) {
     db.prepare("INSERT OR REPLACE INTO system_config (key, value, updated_at) VALUES ('maintenance_return_time', ?, datetime('now'))").run(returnTime);
   }
-}
-
-export function getPerformanceMetrics() {
-  return {
-    apiResponseMs: Math.round(45 + Math.random() * 30),
-    dbQueryMs: Math.round(8 + Math.random() * 12),
-    memoryPct: Math.round(55 + Math.random() * 15),
-    activeConnections: Math.round(12 + Math.random() * 8),
-    lastVacuum: new Date(Date.now() - 86400000 * 3).toISOString(),
-    lastReindex: new Date(Date.now() - 86400000 * 7).toISOString(),
-  };
 }
 
 export function getNotificationRules(orgId: string) {

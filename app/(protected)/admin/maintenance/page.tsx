@@ -25,22 +25,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { api } from '@/services/api';
 import { formatRelativeTime } from '@/utils/dateFormat';
-import { PageLoadingSkeleton, PageError, EmptyState } from '@/components/shared/PageStates';
+import { PageLoadingSkeleton, PageError } from '@/components/shared/PageStates';
 import { toast } from 'sonner';
-import { Wrench, Activity, Database, Bell } from 'lucide-react';
+import { Wrench, Bell, Info } from 'lucide-react';
 
 interface MaintenanceConfig {
   enabled: boolean;
   returnTime: string | null;
-}
-
-interface PerformanceMetrics {
-  apiResponseMs: number;
-  dbQueryMs: number;
-  memoryPct: number;
-  activeConnections: number;
-  lastVacuum: string;
-  lastReindex: string;
 }
 
 interface NotificationRule {
@@ -52,15 +43,8 @@ interface NotificationRule {
 
 interface MaintenanceResponse {
   maintenance: MaintenanceConfig;
-  performance: PerformanceMetrics;
   notificationRules: NotificationRule[];
 }
-
-const optimizeTasks = [
-  { id: 'vacuum', label: 'Vacuum database', icon: Database },
-  { id: 'reindex', label: 'Reindex tables', icon: Database },
-  { id: 'cache_clear', label: 'Clear API cache', icon: Activity },
-];
 
 export default function AdminMaintenancePage() {
   const [data, setData] = useState<MaintenanceResponse | null>(null);
@@ -113,16 +97,6 @@ export default function AdminMaintenancePage() {
     setConfirmMaintenance(true);
   };
 
-  const runOptimize = async (task: string) => {
-    try {
-      await api.post('/admin/maintenance', { action: 'optimize', task });
-      toast.success(`${task} completed`);
-      fetchMaintenance(true);
-    } catch {
-      toast.error('Optimization failed');
-    }
-  };
-
   const saveNotificationRule = async () => {
     try {
       await api.post('/admin/maintenance', { action: 'notification-rule', ...newRule });
@@ -134,18 +108,19 @@ export default function AdminMaintenancePage() {
     }
   };
 
-  if (loading && !data) return <div className="p-6"><PageLoadingSkeleton rows={5} /></div>;
+  if (loading && !data) return <div className="p-6"><PageLoadingSkeleton rows={4} /></div>;
   if (error && !data) return <div className="p-6"><PageError message={error} onRetry={() => fetchMaintenance()} /></div>;
-  if (!data) return <div className="p-6"><EmptyState title="No maintenance data" description="System configuration is unavailable." /></div>;
+  if (!data) return null;
 
-  const perf = data.performance;
   const rules = data.notificationRules;
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">System Maintenance</h1>
-        <p className="text-sm text-muted-foreground">Maintenance mode, performance, and notifications</p>
+        <p className="text-sm text-muted-foreground">
+          Take the app offline for upgrades and decide who gets notified when system events happen.
+        </p>
       </div>
 
       <Card className="p-6">
@@ -153,8 +128,10 @@ export default function AdminMaintenancePage() {
           <div className="flex items-center gap-3">
             <Wrench className="w-5 h-5 text-muted-foreground" />
             <div>
-              <h3 className="font-semibold text-foreground">Maintenance Mode</h3>
-              <p className="text-sm text-muted-foreground">Blocks non-admin access when enabled</p>
+              <h3 className="font-semibold text-foreground">Maintenance mode</h3>
+              <p className="text-sm text-muted-foreground">
+                When ON, only admins can sign in. Use this before upgrades or restores.
+              </p>
             </div>
           </div>
           <Switch
@@ -170,87 +147,52 @@ export default function AdminMaintenancePage() {
         <div className="mt-4">
           <Label>Expected return time</Label>
           <Input type="datetime-local" value={returnTime} onChange={(e) => setReturnTime(e.target.value)} className="max-w-xs mt-1" />
+          <p className="text-xs text-muted-foreground mt-1">
+            Shown to analysts on the maintenance screen so they know when to come back.
+          </p>
         </div>
       </Card>
 
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground">Performance Metrics</h3>
-          <span className="text-xs text-muted-foreground">Auto-refresh 30s</span>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">API response</p>
-            <p className="text-xl font-semibold text-foreground">{perf.apiResponseMs}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">DB query</p>
-            <p className="text-xl font-semibold text-foreground">{perf.dbQueryMs}ms</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Memory</p>
-            <p className="text-xl font-semibold text-foreground">{perf.memoryPct}%</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Connections</p>
-            <p className="text-xl font-semibold text-foreground">{perf.activeConnections}</p>
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground mt-4">
-          Last vacuum: {formatRelativeTime(perf.lastVacuum)} · Last reindex: {formatRelativeTime(perf.lastReindex)}
-        </p>
-      </Card>
-
-      <Card className="p-6">
-        <h3 className="font-semibold text-foreground mb-4">Database Optimization</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {optimizeTasks.map((task) => {
-            const Icon = task.icon;
-            return (
-              <Button key={task.id} variant="outline" className="justify-start h-auto py-3" onClick={() => runOptimize(task.id)}>
-                <Icon className="w-4 h-4 mr-2 shrink-0" />
-                {task.label}
-              </Button>
-            );
-          })}
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-2">
           <Bell className="w-5 h-5 text-muted-foreground" />
-          <h3 className="font-semibold text-foreground">Notification Rules</h3>
+          <h3 className="font-semibold text-foreground">Notification rules</h3>
         </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Decide which system events automatically email or notify admins (e.g. backup failures, AI model degradation).
+        </p>
+
         {rules.length === 0 ? (
-          <p className="text-sm text-muted-foreground mb-4">No notification rules configured.</p>
+          <p className="text-sm text-muted-foreground mb-4">No notification rules configured yet.</p>
         ) : (
           <ul className="space-y-2 mb-4">
             {rules.map((rule) => (
               <li key={rule.id} className="text-sm p-3 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                {rule.event_type} via {rule.delivery_method} → {rule.target_roles}
+                <span className="font-medium text-foreground capitalize">{rule.event_type.replace('_', ' ')}</span>
+                <span className="text-muted-foreground"> → {rule.delivery_method} → {rule.target_roles}</span>
               </li>
             ))}
           </ul>
         )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <Label>Event</Label>
             <Select value={newRule.eventType} onValueChange={(v) => setNewRule({ ...newRule, eventType: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="backup_failed">Backup failed</SelectItem>
-                <SelectItem value="ai_degraded">AI degraded</SelectItem>
+                <SelectItem value="maintenance">Maintenance window starts</SelectItem>
+                <SelectItem value="backup_failed">Backup fails</SelectItem>
+                <SelectItem value="ai_degraded">AI model drops below threshold</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Delivery</Label>
+            <Label>Send via</Label>
             <Select value={newRule.deliveryMethod} onValueChange={(v) => setNewRule({ ...newRule, deliveryMethod: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="slack">Slack</SelectItem>
                 <SelectItem value="in_app">In-app</SelectItem>
               </SelectContent>
             </Select>
@@ -258,6 +200,14 @@ export default function AdminMaintenancePage() {
           <div className="flex items-end">
             <Button onClick={saveNotificationRule}>Add rule</Button>
           </div>
+        </div>
+
+        <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
+          <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <span>
+            Email delivery uses the SMTP settings in your <code>.env</code> file. If SMTP is not configured, rules still
+            create in-app notifications so the bell icon will still update.
+          </span>
         </div>
       </Card>
 
@@ -267,8 +217,8 @@ export default function AdminMaintenancePage() {
             <AlertDialogTitle>{pendingEnabled ? 'Enable maintenance mode?' : 'Disable maintenance mode?'}</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingEnabled
-                ? 'Users will be blocked from the application until maintenance is disabled.'
-                : 'The application will return to normal operation for all users.'}
+                ? 'All non-admin users will be locked out until you turn this off again.'
+                : 'The application will return to normal access for everyone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

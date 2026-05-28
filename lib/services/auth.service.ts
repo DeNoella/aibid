@@ -5,6 +5,7 @@ import { signToken } from '@/lib/auth';
 import { MfaService } from '@/lib/services/mfa.service';
 import { EmailService } from '@/lib/services/email.service';
 import { saveGeneratedAvatar } from '@/lib/services/avatar.service';
+import { notifyAdmins } from '@/lib/services/notifications.service';
 import {
   AppError,
   assertEmailAvailable,
@@ -44,6 +45,18 @@ export async function registerUser(name: string, email: string, password: string
   for (const s of stages) stageStmt.run(uuid(), orgId, ...s);
 
   const avatarUrl = saveGeneratedAvatar(userId, { seed: userId });
+
+  // Notify existing admins (in-app + best-effort email) that a new
+  // analyst joined. This is what drives the live "new users today" tile
+  // and the admin notification bell.
+  notifyAdmins(orgId, {
+    priority: 'LOW',
+    title: 'New analyst account created',
+    message: `${name.trim()} (${normalizedEmail}) just created an analyst account.`,
+    linkUrl: '/admin/users',
+    actorName: name.trim(),
+    actionLabel: 'New user',
+  });
 
   // Send welcome email asynchronously so registration response is not blocked
   // by SMTP latency (can be several seconds).

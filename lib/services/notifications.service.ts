@@ -1,25 +1,156 @@
 import { v4 as uuid } from 'uuid';
 import { getDb } from '@/lib/db';
+import { EmailService } from '@/lib/services/email.service';
+import { AppError } from '@/lib/validation';
 
 export function getNotifications(userId: string) {
   const db = getDb();
   return db.prepare('SELECT * FROM notifications WHERE user_id = ? AND is_dismissed = 0 ORDER BY created_at DESC').all(userId);
 }
 
-export function createNotification(orgId: string, userId: string, data: { priority: string; title: string; message: string; linkUrl?: string }) {
+export function getUnreadCount(userId: string): number {
+  const db = getDb();
+  const row = db.prepare(
+    'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0 AND is_dismissed = 0'
+  ).get(userId) as { count: number };
+  return row.count;
+}
+
+export function markAllRead(userId: string) {
+  const db = getDb();
+  db.prepare('UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0').run(userId);
+}
+
+export function createNotification(
+  orgId: string,
+  userId: string,
+  data: {
+    priority: string;
+    title: string;
+    message: string;
+    linkUrl?: string;
+    senderUserId?: string | null;
+    senderName?: string | null;
+    category?: 'system' | 'message';
+  }
+) {
   const db = getDb();
   const id = uuid();
-  db.prepare('INSERT INTO notifications (id, user_id, organization_id, priority, title, message, link_url) VALUES (?, ?, ?, ?, ?, ?, ?)').run(
-    id, userId, orgId, data.priority, data.title, data.message, data.linkUrl ?? null
+  db.prepare(
+    'INSERT INTO notifications (id, user_id, organization_id, priority, title, message, link_url, sender_user_id, sender_name, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(
+    id,
+    userId,
+    orgId,
+    data.priority,
+    data.title,
+    data.message,
+    data.linkUrl ?? null,
+    data.senderUserId ?? null,
+    data.senderName ?? null,
+    data.category ?? 'system'
   );
   return id;
 }
 
-export function notifyAdmins(orgId: string, data: { title: string; message: string; priority?: string }) {
+/**
+ * Send a direct user-to-user message. Inserts an in-app notification
+ * for each recipient and (best-effort) emails them in the background.
+ * Works across organizations — any active AIBID user can be a recipient.
+ */
+export function sendDirectMessage(
+  _orgIdIgnored: string,
+  sender: { id: string; name: string },
+  data: { recipientIds: string[]; subject: string; body: string; priority?: 'LOW' | 'MEDIUM' | 'HIGH' }
+): { delivered: number; recipients: { id: string; name: string }[] } {
+  const subject = data.subject?.trim();
+  const body = data.body?.trim();
+
+  if (!subject) throw new AppError('Subject is required.');
+  if (!body) throw new AppError('Message body is required.');
+  if (!Array.isArray(data.recipientIds) || data.recipientIds.length === 0) {
+    throw new AppError('Pick at least one recipient.');
+  }
+  if (subject.length > 200) throw new AppError('Subject must be 200 characters or fewer.');
+  if (body.length > 5000) throw new AppError('Message must be 5000 characters or fewer.');
+
   const db = getDb();
-  const admins = db.prepare("SELECT id FROM users WHERE organization_id = ? AND role = 'admin'").all(orgId) as { id: string }[];
+  const placeholders = data.recipientIds.map(() => '?').join(',');
+  const recipients = db.prepare(
+    `SELECT id, name, email, organization_id FROM users
+     WHERE is_active = 1 AND id != ? AND id IN (${placeholders})`
+  ).all(sender.id, ...data.recipientIds) as {
+    id: string;
+    name: string;
+    email: string;
+    organization_id: string;
+  }[];
+
+  if (recipients.length === 0) {
+    throw new AppError('No valid recipients found.', 400);
+  }
+
+  for (const r of recipients) {
+    createNotification(r.organization_id, r.id, {
+      priority: data.priority ?? 'MEDIUM',
+      title: subject,
+      message: body,
+      linkUrl: '/notifications',
+      senderUserId: sender.id,
+      senderName: sender.name,
+      category: 'message',
+    });
+    setImmediate(() => {
+      EmailService.sendUserMessage(r.email, {
+        fromName: sender.name,
+        subject,
+        body,
+        linkUrl: '/notifications',
+      }).catch(() => {
+        // SMTP not configured or transient failure — in-app inbox still works.
+      });
+    });
+  }
+
+  return {
+    delivered: recipients.length,
+    recipients: recipients.map((r) => ({ id: r.id, name: r.name })),
+  };
+}
+
+/**
+ * Notify every admin in an organization both in-system and (best-effort)
+ * via email. Email is dispatched asynchronously so callers never have to
+ * await SMTP latency.
+ */
+export function notifyAdmins(
+  orgId: string,
+  data: { title: string; message: string; priority?: string; linkUrl?: string; actorName?: string; actionLabel?: string }
+) {
+  const db = getDb();
+  const admins = db.prepare(
+    "SELECT id, email FROM users WHERE organization_id = ? AND role = 'admin' AND is_active = 1"
+  ).all(orgId) as { id: string; email: string }[];
+
   for (const admin of admins) {
-    createNotification(orgId, admin.id, { ...data, priority: data.priority ?? 'MEDIUM' });
+    createNotification(orgId, admin.id, {
+      priority: data.priority ?? 'MEDIUM',
+      title: data.title,
+      message: data.message,
+      linkUrl: data.linkUrl,
+    });
+    // Best-effort email — fire and forget so the calling request stays fast.
+    setImmediate(() => {
+      EmailService.sendAdminAlert(admin.email, {
+        title: data.title,
+        message: data.message,
+        actorName: data.actorName,
+        actionLabel: data.actionLabel,
+        linkUrl: data.linkUrl,
+      }).catch(() => {
+        // SMTP not configured or transient failure — swallow.
+      });
+    });
   }
 }
 

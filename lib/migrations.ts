@@ -45,6 +45,11 @@ export function runMigrations(db: Database.Database) {
   safeExec(db, "ALTER TABLE audit_logs ADD COLUMN risk_level TEXT DEFAULT 'normal'");
   safeExec(db, "ALTER TABLE audit_logs ADD COLUMN user_agent TEXT");
 
+  // Notification sender (so direct messages between users can show who they came from)
+  safeExec(db, "ALTER TABLE notifications ADD COLUMN sender_user_id TEXT REFERENCES users(id) ON DELETE SET NULL");
+  safeExec(db, "ALTER TABLE notifications ADD COLUMN sender_name TEXT");
+  safeExec(db, "ALTER TABLE notifications ADD COLUMN category TEXT NOT NULL DEFAULT 'system'");
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS service_health (
       id              TEXT PRIMARY KEY,
@@ -207,5 +212,24 @@ export function runMigrations(db: Database.Database) {
       success         INTEGER NOT NULL DEFAULT 1,
       created_at      TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS admin_tasks (
+      id              TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL REFERENCES organizations(id),
+      title           TEXT NOT NULL,
+      description     TEXT,
+      status          TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','in_progress','done')),
+      priority        TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('low','medium','high')),
+      due_date        TEXT,
+      source          TEXT NOT NULL DEFAULT 'manual' CHECK(source IN ('manual','system')),
+      system_key      TEXT UNIQUE,
+      created_by      TEXT REFERENCES users(id),
+      assigned_to     TEXT REFERENCES users(id),
+      created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
+      completed_at    TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_admin_tasks_org ON admin_tasks(organization_id);
+    CREATE INDEX IF NOT EXISTS idx_admin_tasks_status ON admin_tasks(status);
   `);
 }
