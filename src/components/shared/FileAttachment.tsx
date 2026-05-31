@@ -85,6 +85,8 @@ export function FileDropZone({ onAttach, maxSizeMb = MAX_SIZE_MB }: FileDropZone
       onAttach(parsed);
     } catch {
       toast.error('Could not parse file');
+    } finally {
+      if (inputRef.current) inputRef.current.value = '';
     }
   };
 

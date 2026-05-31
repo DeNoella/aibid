@@ -1,15 +1,17 @@
+'use client';
+
 import { Mic, MicOff, Volume2, AlertCircle, ShieldCheck, Loader2, Table2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { parseVoiceCommand, getCommandFeedback, isDashboardCommand, VoiceCommandAction } from '@/utils/voiceCommands';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/services/api';
 import { FileDropZone, FileAttachmentChip } from '@/components/shared/FileAttachment';
 import type { ParsedFileData } from '@/utils/fileParser';
-import { InlineDataChart, inferChartType, shouldShowChart } from '@/components/shared/InlineDataChart';
+import { InlineDataChart, inferChartType } from '@/components/shared/InlineDataChart';
 
 interface QueryResult {
   question: string;
@@ -25,6 +27,17 @@ interface VoiceControlProps {
 }
 
 type VoiceMetricFocus = 'revenue' | 'campaigns' | 'clicks' | 'conversion' | 'impressions';
+
+function speak(text: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 1.0;
+  utterance.pitch = 1.05;
+  utterance.volume = 1.0;
+  window.speechSynthesis.speak(utterance);
+}
 
 const inferMetricFocus = (text: string): VoiceMetricFocus | null => {
   const lower = text.toLowerCase();
@@ -43,8 +56,10 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
   const [querying, setQuerying] = useState(false);
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [attachedFile, setAttachedFile] = useState<ParsedFileData | null>(null);
+  // Incrementing this key forces FileDropZone to remount with a clean input after each query
+  const [fileZoneKey, setFileZoneKey] = useState(0);
 
-  const handleVoiceResult = async (result: { transcript: string; isFinal: boolean }) => {
+  const handleVoiceResult = useCallback(async (result: { transcript: string; isFinal: boolean }) => {
     if (!result.isFinal) return;
 
     const transcript = result.transcript;
@@ -66,15 +81,14 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
       setFeedback('');
       const transcriptFocus = inferMetricFocus(transcript);
       if (transcriptFocus) {
-        // Even natural-language questions should drive card/chart analytics focus.
         onCommand({ metric: transcriptFocus, action: 'show' });
       } else {
-        // Keep visualizations responsive even for broad questions.
         onCommand({ metric: 'campaigns', action: 'show' });
       }
 
       setQuerying(true);
-      toast.info('Processing your question...', { description: `"${transcript}"` });
+      toast.info('Processing your question…', { description: `"${transcript}"` });
+
       try {
         const payload: Record<string, unknown> = { question: transcript };
         if (attachedFile) {
@@ -90,9 +104,14 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
           data.fileData = attachedFile.rows;
         }
         setQueryResult(data);
-        setAttachedFile(null);
 
-        // If transcript is broad, infer analytics focus from returned data/answer text.
+        // Clear the attached file and reset the drop zone so user can upload another
+        setAttachedFile(null);
+        setFileZoneKey((k) => k + 1);
+
+        // Announce result
+        speak("Recorded. Here's what you asked for.");
+
         if (!transcriptFocus) {
           const resultText = `${data.answer} ${data.columns.join(' ')}`;
           const resultFocus = inferMetricFocus(resultText);
@@ -104,11 +123,12 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
         toast.success(`Found ${data.rowCount} result${data.rowCount !== 1 ? 's' : ''}`);
       } catch {
         toast.error('Could not process your question. Try rephrasing it.');
+        speak('Sorry, I could not process your question. Please try again.');
       } finally {
         setQuerying(false);
       }
     }
-  };
+  }, [attachedFile, onCommand]);
 
   const {
     isListening,
@@ -119,8 +139,17 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
     confidence,
     error,
     hasPermission,
-    requestPermission
+    requestPermission,
   } = useVoiceRecognition(handleVoiceResult);
+
+  const handleStartListening = () => {
+    speak('Now listening.');
+    startListening();
+  };
+
+  const handleStopListening = () => {
+    stopListening();
+  };
 
   if (!isSupported) {
     return (
@@ -156,15 +185,19 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
 
   return (
     <div className="space-y-3">
-      <FileDropZone onAttach={setAttachedFile} />
+      {/* File drop zone — key resets it after each query so user can re-upload */}
+      <FileDropZone key={fileZoneKey} onAttach={setAttachedFile} />
       {attachedFile && (
         <FileAttachmentChip data={attachedFile} onRemove={() => setAttachedFile(null)} />
       )}
+
       <Card className="p-4">
         <div className="flex items-start gap-4">
           <Button
-            onClick={isListening ? stopListening : startListening}
-            className={isListening ? "bg-red-600 hover:bg-red-700" : "bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"}
+            onClick={isListening ? handleStopListening : handleStartListening}
+            className={isListening
+              ? 'bg-red-600 hover:bg-red-700 text-white'
+              : 'bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90'}
             size="lg"
             disabled={querying}
           >
@@ -179,12 +212,13 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : querying ? 'bg-blue-500 animate-pulse' : 'bg-neutral-300'}`} />
               <span className="text-sm text-muted-foreground">
-                {querying ? 'Querying database...' : isListening ? 'Listening...' : 'Voice control inactive'}
+                {isListening ? 'Now listening…' : querying ? 'Processing your question…' : 'Voice control ready'}
               </span>
             </div>
 
             {error && !isListening && (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-red-50 border border-red-200 rounded-lg p-3">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-red-800">{error}</p>
@@ -194,12 +228,8 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
 
             <AnimatePresence mode="wait">
               {isListening && transcript && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="bg-neutral-50 rounded-lg p-3 border border-neutral-200"
-                >
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                  className="bg-neutral-50 rounded-lg p-3 border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-700">
                   <div className="flex items-start gap-2">
                     <Volume2 className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
@@ -214,36 +244,32 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
             </AnimatePresence>
 
             {querying && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-sm text-blue-600">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="flex items-center gap-2 text-sm text-blue-600">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Processing query...
+                Querying your data…
               </motion.div>
             )}
 
             {feedback && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-sm text-green-800 font-medium">{feedback}</p>
-                {lastCommand && <p className="text-xs text-green-600 mt-1">"{lastCommand}"</p>}
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                className="bg-green-50 border border-green-200 rounded-lg p-3 dark:bg-green-950/20 dark:border-green-800">
+                <p className="text-sm text-green-800 dark:text-green-300 font-medium">{feedback}</p>
+                {lastCommand && <p className="text-xs text-green-600 dark:text-green-400 mt-1">"{lastCommand}"</p>}
               </motion.div>
             )}
 
-            <div className="pt-2">
-              <p className="text-xs text-muted-foreground">
-                Try: "What is total revenue this month?", "Show campaign analytics", "How many conversions do we have?", "Show click metrics", "Show impression metrics"
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground pt-1">
+              Try: "What is total revenue this month?", "Show campaign analytics", "How many conversions do we have?"
+            </p>
           </div>
         </div>
       </Card>
 
-      {/* AI Query Results */}
+      {/* Query results with visualization */}
       <AnimatePresence>
         {queryResult && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <Card className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -257,20 +283,27 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
 
               <p className="text-sm text-foreground font-medium mb-3">{queryResult.answer}</p>
 
-              {queryResult.fileData && queryResult.fileData.length > 0 && shouldShowChart(queryResult.question) && (
+              {/* Always show chart when there's data — for both file data and database query results */}
+              {queryResult.fileData && queryResult.fileData.length > 0 && (
                 <InlineDataChart
                   type={inferChartType(queryResult.question, queryResult.fileData)}
                   data={queryResult.fileData}
                 />
               )}
+              {!queryResult.fileData && queryResult.data.length > 0 && (
+                <InlineDataChart
+                  type={inferChartType(queryResult.question, queryResult.data)}
+                  data={queryResult.data}
+                />
+              )}
 
               {queryResult.data.length > 0 && (
                 <>
-                  <div className="overflow-x-auto rounded-lg border border-border bg-card">
+                  <div className="overflow-x-auto rounded-lg border border-border bg-card mt-3">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-muted border-b border-border">
-                          {queryResult.columns.map(col => (
+                          {queryResult.columns.map((col) => (
                             <th key={col} className="px-3 py-2 text-left font-medium text-foreground whitespace-nowrap">{col}</th>
                           ))}
                         </tr>
@@ -278,7 +311,7 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
                       <tbody>
                         {queryResult.data.slice(0, 10).map((row, i) => (
                           <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/40">
-                            {queryResult.columns.map(col => (
+                            {queryResult.columns.map((col) => (
                               <td key={col} className="px-3 py-2 text-foreground/90 whitespace-nowrap max-w-[250px] truncate">
                                 {String(row[col] ?? '-')}
                               </td>
@@ -293,6 +326,11 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
                   )}
                 </>
               )}
+
+              {/* Prompt to ask another question */}
+              <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                Upload another file or click <strong>Start Voice Control</strong> to ask a follow-up question.
+              </p>
             </Card>
           </motion.div>
         )}
