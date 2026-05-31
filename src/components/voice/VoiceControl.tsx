@@ -164,7 +164,7 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
         <div className="flex items-start gap-4">
           <Button
             onClick={isListening ? stopListening : startListening}
-            className={isListening ? "bg-red-600 hover:bg-red-700" : "bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"}
+            className={isListening ? "bg-red-600 hover:bg-red-700" : "bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"}
             size="lg"
             disabled={querying}
           >

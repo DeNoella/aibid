@@ -122,7 +122,7 @@ export default function ReportsPage() {
             Filter
           </Button>
           <Button
-            className="flex-1 sm:flex-none bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 text-xs sm:text-sm"
+            className="flex-1 sm:flex-none bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90 text-xs sm:text-sm"
             onClick={handleGenerateReport}
           >
             <Plus className="w-4 h-4 mr-2" />

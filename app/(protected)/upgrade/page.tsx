@@ -95,7 +95,7 @@ export default function UpgradePage() {
           </ul>
           {!isAlreadyPremium && (
             <Button
-              className="w-full bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 mt-2"
+              className="w-full bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90 mt-2"
               onClick={handleUpgrade}
               disabled={upgrading}
             >

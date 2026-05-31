@@ -143,7 +143,7 @@ function BuilderContent() {
               className="mt-2 mb-4"
             />
             <Button
-              className="w-full bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900"
+              className="w-full bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"
               onClick={handleGenerate}
               disabled={generating}
             >

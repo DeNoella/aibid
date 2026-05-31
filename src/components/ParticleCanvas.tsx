@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 const PARTICLE_COUNT = 80;
 const CONNECT_DISTANCE = 100;
@@ -45,7 +46,28 @@ function getMotionConfig(documentMode: boolean) {
   };
 }
 
-export function ParticleCanvas({ fullPage = false, variant = 'viewport' }: ParticleCanvasProps) {
+/**
+ * Particle canvas — renders only in dark mode. In light mode the component
+ * returns null so the background stays clean. The internal `Inner` component
+ * holds the canvas + animation loop so it mounts/unmounts cleanly when the
+ * theme toggle is flipped.
+ */
+export function ParticleCanvas(props: ParticleCanvasProps) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Wait for next-themes to hydrate before deciding whether to render.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+  if (resolvedTheme === 'light') return null;
+
+  return <Inner {...props} />;
+}
+
+function Inner({ fullPage = false, variant = 'viewport' }: ParticleCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const documentMode = fullPage && variant === 'document';

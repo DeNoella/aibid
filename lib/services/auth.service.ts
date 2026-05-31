@@ -15,7 +15,13 @@ import {
   validatePassword,
 } from '@/lib/validation';
 
-export async function registerUser(name: string, email: string, password: string, organization: string) {
+export async function registerUser(
+  name: string,
+  email: string,
+  password: string,
+  organization: string,
+  department?: string
+) {
   const db = getDb();
   const role = 'analyst';
   const subscriptionStatus = 'free_trial';
@@ -26,10 +32,11 @@ export async function registerUser(name: string, email: string, password: string
 
   const orgId = uuid();
   const userId = uuid();
+  const departmentValue = department?.trim() || null;
 
   db.prepare('INSERT INTO organizations (id, name) VALUES (?, ?)').run(orgId, organization.trim() || 'My Organization');
-  db.prepare('INSERT INTO users (id, organization_id, email, password_hash, name, role, subscription_status, profile_setup_completed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
-    userId, orgId, normalizedEmail, hashPassword(password), name.trim(), role, subscriptionStatus, 0
+  db.prepare('INSERT INTO users (id, organization_id, email, password_hash, name, role, department, subscription_status, profile_setup_completed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+    userId, orgId, normalizedEmail, hashPassword(password), name.trim(), role, departmentValue, subscriptionStatus, 0
   );
   db.prepare('INSERT INTO user_preferences (id, user_id) VALUES (?, ?)').run(uuid(), userId);
 

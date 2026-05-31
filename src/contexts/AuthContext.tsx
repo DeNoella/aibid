@@ -17,7 +17,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, organization?: string) => Promise<void>;
+  register: (name: string, email: string, password: string, organization?: string, department?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -128,8 +128,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string, organization?: string): Promise<void> => {
-    const result = await api.post<{ token: string; user: User }>('/auth/register', { name, email, password, organization });
+  const register = async (name: string, email: string, password: string, organization?: string, department?: string): Promise<void> => {
+    const result = await api.post<{ token: string; user: User }>('/auth/register', { name, email, password, organization, department });
     localStorage.setItem('auth_token', result.token);
     setAuthCookie(result.token);
     setUser(mapUser(result.user));

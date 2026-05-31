@@ -50,6 +50,8 @@ import {
   ClipboardCheck,
   Sparkles,
   UserPlus,
+  ShieldCheck,
+  HardDrive,
 } from 'lucide-react';
 
 interface ServiceHealth {
@@ -90,6 +92,7 @@ interface AdminOverview {
   services: ServiceHealth[];
   criticalAlerts: AuditAlert[];
   recentActivity: RecentActivity[];
+  storage: { usedMb: number; capMb: number; usedPct: number };
   serverTime: string;
 }
 
@@ -311,6 +314,43 @@ export default function AdminOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="w-4 h-4" /> Uptime (30 days)
+          </div>
+          <p className={`text-3xl font-semibold mt-2 ${
+            data.uptimePct >= 99 ? 'text-green-600' : data.uptimePct >= 95 ? 'text-amber-600' : 'text-red-600'
+          }`}>{data.uptimePct.toFixed(1)}%</p>
+          <p className="text-xs text-muted-foreground mt-1">Share of time the app was healthy</p>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Activity className="w-4 h-4" /> Online last 24h
+          </div>
+          <p className="text-3xl font-semibold text-foreground mt-2">{data.activeUsers}</p>
+          <p className="text-xs text-muted-foreground mt-1">Users who logged in recently</p>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Brain className="w-4 h-4" /> AI status
+          </div>
+          <p className={`text-3xl font-semibold mt-2 ${aiColorClass(data.aiStatusColor)}`}>{data.aiStatus}</p>
+          <p className="text-xs text-muted-foreground mt-1">Across all predictive models</p>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <HardDrive className="w-4 h-4" /> Database storage
+          </div>
+          <p className={`text-3xl font-semibold mt-2 ${
+            data.storage.usedPct >= 80 ? 'text-red-600' : data.storage.usedPct >= 60 ? 'text-amber-600' : 'text-foreground'
+          }`}>{data.storage.usedMb} MB</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {data.storage.usedPct.toFixed(1)}% of {Math.round(data.storage.capMb)} MB recommended
+          </p>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4" /> Active users
           </div>
           <p className="text-3xl font-semibold text-foreground mt-2">{data.totalUsers}</p>
@@ -329,17 +369,10 @@ export default function AdminOverviewPage() {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Activity className="w-4 h-4" /> Online last 24h
+            <ClipboardCheck className="w-4 h-4" /> Open admin tasks
           </div>
-          <p className="text-3xl font-semibold text-foreground mt-2">{data.activeUsers}</p>
-          <p className="text-xs text-muted-foreground mt-1">Users who logged in recently</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Brain className="w-4 h-4" /> AI status
-          </div>
-          <p className={`text-3xl font-semibold mt-2 ${aiColorClass(data.aiStatusColor)}`}>{data.aiStatus}</p>
-          <p className="text-xs text-muted-foreground mt-1">Across all predictive models</p>
+          <p className="text-3xl font-semibold text-foreground mt-2">{data.openTasks}</p>
+          <p className="text-xs text-muted-foreground mt-1">Items needing your attention</p>
         </Card>
       </div>
 

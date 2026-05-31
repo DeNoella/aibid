@@ -70,9 +70,9 @@ This package contains **5 test datasets** for validating the AIBID analytics das
 3. *"Which customer has submitted the most tickets, and what are their common tags?"*
 
 ### Dataset 5 — Customer Notes
-1. *"What action items are mentioned across all customer notes?"*
-2. *"Which deals have security or compliance concerns based on the notes?"*
-3. *"Summarize the current status of the Vertex Systems deal."*
+1. *"What action items are mentioned across all customer notes? WORKS"*
+2. *"Which deals have security or compliance concerns based on the notes? WORKS"*
+3. *"Summarize the current status of the Vertex Systems deal. WORKS"*
 
 ---
 

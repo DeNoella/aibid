@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { UserAvatar } from '@/components/profile/UserAvatar';
 import { ProfileDialog } from '@/components/profile/ProfileDialog';
 import { cn } from '@/components/ui/utils';
@@ -99,6 +100,8 @@ export const TopNav = () => {
               </div>
 
               <div className="flex items-center gap-1 sm:gap-2">
+                <ThemeToggle className="hidden md:flex" />
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -108,7 +111,7 @@ export const TopNav = () => {
                   <Link href="/notifications" aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}>
                     <Bell className="h-4 w-4" />
                     {unreadCount > 0 && (
-                      <span className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-background">
+                      <span className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-brand-foreground">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
@@ -189,6 +192,7 @@ export const TopNav = () => {
                 <div className="max-h-[75vh] space-y-3 overflow-y-auto px-3 py-4 sm:px-4">
                   <AppSidebar mobile onNavigate={() => setMobileMenuOpen(false)} />
                   <div className="space-y-2 border-t border-border/60 pt-3">
+                    <ThemeToggle variant="menu" />
                     <Link
                       href="/notifications"
                       onClick={() => setMobileMenuOpen(false)}
@@ -197,7 +201,7 @@ export const TopNav = () => {
                       <Bell className="h-4 w-4" />
                       <span className="flex-1">Notifications</span>
                       {unreadCount > 0 && (
-                        <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold text-background">
+                        <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold text-brand-foreground">
                           {unreadCount > 99 ? '99+' : unreadCount}
                         </span>
                       )}

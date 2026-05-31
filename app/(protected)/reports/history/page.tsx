@@ -78,8 +78,24 @@ function HistoryContent() {
 
   const types = [...new Set(reports.map((r) => r.type))];
 
-  const handleDownload = (report: Report) => {
-    toast.success('Download started', { description: `Preparing ${report.title}…` });
+  const handleDownload = async (report: Report) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`/api/reports/${report.id}/download`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${report.title.replace(/[^a-zA-Z0-9-_]+/g, '_').slice(0, 60) || 'report'}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Download started', { description: `Saved ${a.download}` });
+    } catch {
+      toast.error('Could not download report');
+    }
   };
 
   const handleRegenerate = async (report: Report) => {

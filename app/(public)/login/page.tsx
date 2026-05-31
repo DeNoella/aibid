@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { AuthFormCard } from '@/components/auth/AuthFormCard';
 import { ParticleCanvas } from '@/components/ParticleCanvas';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPasswordErrors } from '@/utils/validation';
 import { api, ApiError } from '@/services/api';
 import { motion } from 'motion/react';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 function AuthPageContent() {
@@ -32,6 +33,7 @@ function AuthPageContent() {
     password: '',
     confirmPassword: '',
     organization: '',
+    department: '',
   });
 
   useEffect(() => {
@@ -89,7 +91,13 @@ function AuthPageContent() {
 
     setIsLoading(true);
     try {
-      await register(formData.name, formData.email, formData.password, formData.organization);
+      await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.organization,
+        formData.department
+      );
       toast.success('Account created successfully!', { description: 'Welcome to AIBID' });
       router.push('/onboarding/profile');
     } catch (error) {
@@ -145,7 +153,7 @@ function AuthPageContent() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-brand hover:bg-brand/90 text-brand-foreground font-semibold"
+                  className="w-full bg-neutral-900 text-white hover:bg-black dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90 font-semibold"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -160,6 +168,15 @@ function AuthPageContent() {
               </form>
             ) : (
               <form onSubmit={handleSignUp} className="space-y-5">
+                <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800 px-3 py-2">
+                  <ShieldCheck className="w-4 h-4 mt-0.5 text-blue-600 dark:text-blue-300 shrink-0" />
+                  <div className="text-xs text-blue-800 dark:text-blue-200">
+                    You will be created as a{' '}
+                    <Badge className="mx-1 bg-blue-100 text-blue-700 border-blue-200">Data Analyst</Badge>
+                    by default. System Administrator access is granted only by an existing admin after registration.
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
                   <Input
@@ -181,6 +198,19 @@ function AuthPageContent() {
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    disabled={isLoading}
+                    className="bg-input-background"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-department">Department</Label>
+                  <Input
+                    id="signup-department"
+                    type="text"
+                    placeholder="e.g. Marketing, Finance, Operations"
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     disabled={isLoading}
                     className="bg-input-background"
                   />
@@ -212,7 +242,7 @@ function AuthPageContent() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-brand hover:bg-brand/90 text-brand-foreground font-semibold"
+                  className="w-full bg-neutral-900 text-white hover:bg-black dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90 font-semibold"
                   disabled={isLoading}
                 >
                   {isLoading ? (

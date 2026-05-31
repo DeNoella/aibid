@@ -6,9 +6,55 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root,
-.dark {
+:root {
   --font-size: 16px;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --radius: 0.75rem;
+
+  /* Light theme — modern, soft white surface with the AIBID brand orange. */
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #0d1117;
+  --card: #ffffff;
+  --card-foreground: #0d1117;
+  --popover: #ffffff;
+  --popover-foreground: #0d1117;
+  --primary: #f0883e;
+  --primary-foreground: #1f1207;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #0d1117;
+  --muted: #f6f8fa;
+  --muted-foreground: #57606a;
+  --accent: #f3f4f6;
+  --accent-foreground: #0d1117;
+  --brand: #f0883e;
+  --brand-foreground: #1f1207;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #f3f4f6;
+  --input-background: #ffffff;
+  --switch-background: #d1d5db;
+  --ring: #f0883e;
+  --chart-1: #f0883e;
+  --chart-2: #2563eb;
+  --chart-3: #16a34a;
+  --chart-4: #ca8a04;
+  --chart-5: #7c3aed;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0d1117;
+  --sidebar-primary: #f0883e;
+  --sidebar-primary-foreground: #1f1207;
+  --sidebar-accent: #f3f4f6;
+  --sidebar-accent-foreground: #0d1117;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #f0883e;
+}
+
+.dark {
+  /* Dark theme — original GitHub-inspired palette. */
+  color-scheme: dark;
   --background: #0d1117;
   --foreground: #ffffff;
   --card: #161b22;
@@ -31,15 +77,12 @@
   --input: #21262d;
   --input-background: #0d1117;
   --switch-background: #30363d;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
   --ring: #f0883e;
   --chart-1: #f0883e;
   --chart-2: #58a6ff;
   --chart-3: #3fb950;
   --chart-4: #d29922;
   --chart-5: #bc8cff;
-  --radius: 0.75rem;
   --sidebar: #0d1117;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #f0883e;
@@ -109,7 +152,6 @@
 
   html {
     font-size: var(--font-size);
-    color-scheme: dark;
   }
 
   h1,

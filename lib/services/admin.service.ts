@@ -275,8 +275,40 @@ export function getAdminOverview(orgId: string) {
     aiStatusColor = 'amber';
   }
 
+  // Uptime over the last 30 days: derive from service_health degraded/down
+  // events in the audit log. If nothing is recorded we default to a healthy
+  // baseline. This keeps the metric truthful without needing a separate
+  // monitoring system.
+  const degradedRow = db
+    .prepare(
+      `SELECT COUNT(*) AS c FROM audit_logs
+       WHERE organization_id = ?
+       AND (LOWER(action) LIKE '%down%' OR LOWER(action) LIKE '%degraded%' OR LOWER(severity) = 'critical')
+       AND created_at >= datetime('now', '-30 days')`
+    )
+    .get(orgId) as { c: number };
+  const minutesInWindow = 30 * 24 * 60;
+  // Each recorded incident counts as ~10 minutes of degraded service.
+  const downMinutes = Math.min(minutesInWindow, degradedRow.c * 10);
+  const uptimePct = Math.max(0, Math.min(100, 100 - (downMinutes / minutesInWindow) * 100));
+
+  // Real database storage utilization (file size on disk vs. a 2GB soft cap).
+  let dbBytes = 0;
+  let storagePct = 0;
+  const STORAGE_CAP_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB recommended ceiling
+  try {
+    const dbPath = process.env.DATABASE_FILE || path.join(process.cwd(), 'data', 'crm.db');
+    if (fs.existsSync(dbPath)) {
+      const stat = fs.statSync(dbPath);
+      dbBytes = stat.size;
+      storagePct = Math.min(100, (dbBytes / STORAGE_CAP_BYTES) * 100);
+    }
+  } catch {
+    // Storage unavailable — leave defaults.
+  }
+
   return {
-    uptimePct: 99.7,
+    uptimePct: Math.round(uptimePct * 10) / 10,
     totalUsers: totalUsers.count,
     totalUsersAll: totalUsersAll.count,
     newUsersToday: newUsersToday.count,
@@ -287,6 +319,11 @@ export function getAdminOverview(orgId: string) {
     services,
     criticalAlerts,
     recentActivity,
+    storage: {
+      usedMb: Math.round((dbBytes / (1024 * 1024)) * 100) / 100,
+      capMb: Math.round((STORAGE_CAP_BYTES / (1024 * 1024)) * 100) / 100,
+      usedPct: Math.round(storagePct * 10) / 10,
+    },
     serverTime: new Date().toISOString(),
   };
 }

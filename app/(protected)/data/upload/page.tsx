@@ -22,13 +22,17 @@ import { EmptyState } from '@/components/shared/PageStates';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 import { Upload, FileSpreadsheet, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { parseFile, computeQualityScore } from '@/utils/fileParser';
 
 const TARGET_FIELDS = ['date', 'campaign', 'revenue', 'clicks', 'conversions', 'customer_id', 'region'];
+const ACCEPT_TYPES = '.csv,.xlsx,.xls,.json';
+const MAX_SIZE_MB = 50;
 
 interface ParsedData {
   headers: string[];
   rows: string[][];
   fileName: string;
+  fileType: string;
 }
 
 interface QualityReport {
@@ -37,48 +41,6 @@ interface QualityReport {
   nullCells: number;
   duplicateRows: number;
   warnings: string[];
-}
-
-function parseCsv(text: string): { headers: string[]; rows: string[][] } {
-  const lines = text.trim().split(/\r?\n/).filter(Boolean);
-  if (lines.length === 0) return { headers: [], rows: [] };
-  const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
-  const rows = lines.slice(1).map((line) => {
-    const cells: string[] = [];
-    let current = '';
-    let inQuotes = false;
-    for (const char of line) {
-      if (char === '"') inQuotes = !inQuotes;
-      else if (char === ',' && !inQuotes) {
-        cells.push(current.trim());
-        current = '';
-      } else current += char;
-    }
-    cells.push(current.trim());
-    return cells;
-  });
-  return { headers, rows };
-}
-
-function computeQuality(headers: string[], rows: string[][]): QualityReport {
-  const totalCells = rows.length * headers.length;
-  let nullCells = 0;
-  rows.forEach((row) => {
-    row.forEach((cell) => {
-      if (!cell || cell === 'null' || cell === 'NULL' || cell === 'N/A') nullCells++;
-    });
-  });
-  const rowStrings = rows.map((r) => r.join('|'));
-  const uniqueRows = new Set(rowStrings);
-  const duplicateRows = rows.length - uniqueRows.size;
-  const nullPct = totalCells > 0 ? nullCells / totalCells : 0;
-  const dupPct = rows.length > 0 ? duplicateRows / rows.length : 0;
-  const score = Math.max(0, Math.round(100 - nullPct * 60 - dupPct * 40));
-  const warnings: string[] = [];
-  if (nullPct > 0.1) warnings.push(`${Math.round(nullPct * 100)}% of cells contain null or empty values`);
-  if (duplicateRows > 0) warnings.push(`${duplicateRows} duplicate rows detected`);
-  if (headers.length < 3) warnings.push('Dataset has fewer than 3 columns');
-  return { score, totalRows: rows.length, nullCells, duplicateRows, warnings };
 }
 
 function autoMapColumns(headers: string[]): Record<string, string> {
@@ -103,21 +65,51 @@ function UploadContent() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  const processFile = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const { headers, rows } = parseCsv(text);
-      if (headers.length === 0) {
-        toast.error('Could not parse file');
+  const processFile = useCallback(async (file: File) => {
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast.error(`File must be under ${MAX_SIZE_MB} MB`);
+      return;
+    }
+    try {
+      const parsedFile = await parseFile(file);
+      if (parsedFile.columns.length === 0) {
+        toast.error('Could not detect any columns');
         return;
       }
-      const q = computeQuality(headers, rows);
-      setParsed({ headers, rows, fileName: file.name });
-      setQuality(q);
-      setColumnMap(autoMapColumns(headers));
-    };
-    reader.readAsText(file);
+      const rowsAsStrings = parsedFile.rows.map((row) =>
+        parsedFile.columns.map((col) => {
+          const v = row[col];
+          return v == null ? '' : String(v);
+        })
+      );
+      const q = computeQualityScore(parsedFile.rows);
+      const warnings: string[] = [];
+      if (q.completeness < 90) {
+        warnings.push(`${100 - q.completeness}% of cells are missing values`);
+      }
+      if (q.duplicateCount > 0) {
+        warnings.push(`${q.duplicateCount} duplicate rows detected`);
+      }
+      warnings.push(...q.formatIssues);
+      if (parsedFile.columns.length < 3) warnings.push('Dataset has fewer than 3 columns');
+
+      setParsed({
+        headers: parsedFile.columns,
+        rows: rowsAsStrings,
+        fileName: parsedFile.filename,
+        fileType: parsedFile.fileType,
+      });
+      setQuality({
+        score: q.score,
+        totalRows: parsedFile.rowCount,
+        nullCells: q.missingByColumn.reduce((acc, m) => acc + m.missing, 0),
+        duplicateRows: q.duplicateCount,
+        warnings,
+      });
+      setColumnMap(autoMapColumns(parsedFile.columns));
+    } catch {
+      toast.error('Could not parse file. Supported: CSV, Excel (.xlsx/.xls), JSON.');
+    }
   }, []);
 
   const handleDrop = (e: React.DragEvent) => {
@@ -173,10 +165,17 @@ function UploadContent() {
       >
         <div className="flex flex-col items-center text-center">
           <Upload className="w-10 h-10 text-muted-foreground mb-3" />
-          <p className="font-medium text-foreground mb-1">Drag and drop your CSV file</p>
-          <p className="text-sm text-muted-foreground mb-4">or click to browse</p>
+          <p className="font-medium text-foreground mb-1">Drag and drop your data file</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            CSV, Excel (.xlsx, .xls) or JSON — up to {MAX_SIZE_MB} MB
+          </p>
           <label>
-            <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleFileInput} />
+            <input
+              type="file"
+              accept={ACCEPT_TYPES}
+              className="hidden"
+              onChange={handleFileInput}
+            />
             <Button variant="outline" asChild>
               <span>Select file</span>
             </Button>
@@ -191,6 +190,7 @@ function UploadContent() {
               <div className="flex items-center gap-2 mb-3">
                 <FileSpreadsheet className="w-5 h-5" />
                 <h3 className="font-semibold">{parsed.fileName}</h3>
+                <Badge variant="outline" className="text-xs">{parsed.fileType}</Badge>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">Quality score</span>
@@ -314,7 +314,7 @@ function UploadContent() {
 
           <div className="flex justify-end">
             <Button
-              className="bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900"
+              className="bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"
               disabled={!canUpload}
               onClick={() => setConfirmOpen(true)}
             >

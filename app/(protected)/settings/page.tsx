@@ -176,7 +176,7 @@ export default function SettingsPage() {
                 <Label htmlFor="organization">Organization</Label>
                 <Input id="organization" value={profileForm.organizationName} onChange={(e) => setProfileForm({...profileForm, organizationName: e.target.value})} />
               </div>
-              <Button onClick={handleSaveProfile} className="w-full sm:w-auto bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">
+              <Button onClick={handleSaveProfile} className="w-full sm:w-auto bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">
                 Save Changes
               </Button>
             </div>
@@ -232,7 +232,7 @@ export default function SettingsPage() {
                     onCheckedChange={(checked) => setPreferences({...preferences, notify_insights: checked ? 1 : 0})}
                   />
                 </div>
-                <Button onClick={handleSavePreferences} className="bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">
+                <Button onClick={handleSavePreferences} className="bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">
                   Save Preferences
                 </Button>
               </div>
@@ -260,7 +260,7 @@ export default function SettingsPage() {
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <PasswordInput id="confirmPassword" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})} />
               </div>
-              <Button onClick={handleChangePassword} className="bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">
+              <Button onClick={handleChangePassword} className="bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">
                 Update Password
               </Button>
             </div>
@@ -282,7 +282,7 @@ export default function SettingsPage() {
                   <p className="text-sm font-medium text-foreground">Current Session</p>
                   <p className="text-xs text-muted-foreground">Active now</p>
                 </div>
-                <Button size="sm" variant="outline" className="dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Revoke</Button>
+                <Button size="sm" variant="outline" className="dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">Revoke</Button>
               </div>
             </div>
           </Card>
@@ -330,7 +330,7 @@ export default function SettingsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleSavePreferences} className="bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">
+                <Button onClick={handleSavePreferences} className="bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">
                   Save Preferences
                 </Button>
               </div>
@@ -351,14 +351,14 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground mb-3">
                   Your data is retained for 24 months for analytics purposes
                 </p>
-                <Button variant="outline" size="sm" className="dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Manage Retention</Button>
+                <Button variant="outline" size="sm" className="dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">Manage Retention</Button>
               </div>
               <div className="p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
                 <h4 className="font-medium text-foreground mb-2">Export Your Data</h4>
                 <p className="text-sm text-muted-foreground mb-3">
                   Download a copy of all your data and analytics
                 </p>
-                <Button variant="outline" size="sm" className="dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Request Export</Button>
+                <Button variant="outline" size="sm" className="dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90">Request Export</Button>
               </div>
               <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-900">
                 <h4 className="font-medium text-red-900 dark:text-red-400 mb-2">Delete Account</h4>

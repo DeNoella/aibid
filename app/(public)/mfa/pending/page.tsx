@@ -28,9 +28,22 @@ function MfaPendingContent() {
     let stopped = false;
     let intervalId: ReturnType<typeof setInterval> | null = null;
 
+    const stopPolling = () => {
+      stopped = true;
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
     const completeLogin = async () => {
       if (completedRef.current) return;
       completedRef.current = true;
+      // Stop polling BEFORE we ask the server to consume the token, otherwise
+      // a poll that returns after the token has been used will flash the
+      // "no longer valid" message right before we redirect to the dashboard.
+      stopPolling();
+      setStatus('approved');
       setCompleting(true);
       try {
         const res = await fetch('/api/mfa/complete', {
@@ -41,7 +54,7 @@ function MfaPendingContent() {
         const data = await res.json();
 
         if (!res.ok) {
-          if (!stopped) setError(data?.error || 'Could not complete login.');
+          setError(data?.error || 'Could not complete login.');
           return;
         }
 
@@ -49,34 +62,42 @@ function MfaPendingContent() {
           await setSession(data.token);
         }
 
-        stopped = true;
-        if (intervalId) clearInterval(intervalId);
         router.push(data.redirectPath || '/dashboard');
       } catch {
-        if (!stopped) setError('Could not complete login.');
+        setError('Could not complete login.');
       } finally {
         setCompleting(false);
       }
     };
 
     const checkStatus = async () => {
+      // Bail out fast if we've already moved past the polling phase.
+      if (stopped || completedRef.current) return;
       try {
         const res = await fetch(`/api/mfa/status?attemptId=${encodeURIComponent(attemptId)}`);
         const data = await res.json();
 
+        if (stopped || completedRef.current) return;
+
         if (!res.ok) {
-          if (!stopped) setError(data?.error || 'Unable to check approval status.');
+          setError(data?.error || 'Unable to check approval status.');
           return;
         }
 
         const nextStatus = data?.status as MfaStatus;
-        if (!stopped) setStatus(nextStatus);
 
         if (nextStatus === 'approved') {
+          // Stop the interval immediately so a parallel poll can't overwrite
+          // the status with "used" the moment /api/mfa/complete consumes it.
           await completeLogin();
+          return;
         }
+
+        setStatus(nextStatus);
       } catch {
-        if (!stopped) setError('Unable to check approval status.');
+        if (!stopped && !completedRef.current) {
+          setError('Unable to check approval status.');
+        }
       }
     };
 
@@ -86,8 +107,7 @@ function MfaPendingContent() {
     }, 2500);
 
     return () => {
-      stopped = true;
-      if (intervalId) clearInterval(intervalId);
+      stopPolling();
     };
   }, [attemptId, router, setSession]);
 

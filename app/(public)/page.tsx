@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ParticleCanvas } from '@/components/ParticleCanvas';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/components/ui/utils';
 
@@ -119,6 +120,7 @@ export default function LandingPage() {
 
             <div className="flex items-center gap-2">
               <div className="hidden items-center gap-2 md:flex">
+                <ThemeToggle />
                 <Button
                   variant="ghost"
                   className="rounded-xl hover:bg-secondary/70"
@@ -127,12 +129,14 @@ export default function LandingPage() {
                   Sign In
                 </Button>
                 <Button
-                  className="rounded-xl shadow-md shadow-brand/20 transition-transform hover:scale-[1.02]"
+                  className="rounded-xl shadow-md transition-transform hover:scale-[1.02] bg-neutral-900 text-white hover:bg-black dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90 dark:shadow-brand/20"
                   onClick={() => router.push('/register')}
                 >
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
+
+              <ThemeToggle className="md:hidden" />
 
               <Button
                 variant="ghost"
@@ -174,7 +178,7 @@ export default function LandingPage() {
                       Sign In
                     </Button>
                     <Button
-                      className="w-full justify-center rounded-xl"
+                      className="w-full justify-center rounded-xl bg-neutral-900 text-white hover:bg-black dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"
                       onClick={() => router.push('/register')}
                     >
                       Get Started <ArrowRight className="ml-2 h-4 w-4" />
@@ -201,7 +205,7 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-4">
               <Button
                 size="lg"
-                className="w-full md:w-auto bg-neutral-800 hover:bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+                className="w-full md:w-auto bg-neutral-900 text-white hover:bg-black dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"
                 onClick={() => router.push('/register')}
               >
                 Start Free Trial <ArrowRight className="w-4 h-4 ml-2" />
@@ -368,7 +372,11 @@ export default function LandingPage() {
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto">
               Join organizations that are already making smarter decisions with AI-powered analytics
             </p>
-            <Button size="lg" onClick={() => router.push('/register')}>
+            <Button
+              size="lg"
+              className="bg-neutral-900 text-white hover:bg-black dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"
+              onClick={() => router.push('/register')}
+            >
               Get Started Today <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </motion.div>

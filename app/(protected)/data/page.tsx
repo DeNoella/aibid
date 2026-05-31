@@ -113,7 +113,7 @@ export default function DataManagementPage() {
           </div>
         </div>
         <Button
-          className="w-full md:w-auto bg-neutral-800 hover:bg-neutral-900 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+          className="w-full md:w-auto bg-neutral-900 hover:bg-black text-white dark:bg-brand dark:text-brand-foreground dark:hover:bg-brand/90"
           onClick={handleUpload}
         >
           <Upload className="w-4 h-4 mr-2" />
