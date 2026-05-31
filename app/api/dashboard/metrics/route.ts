@@ -6,5 +6,7 @@ export const GET = withAuth((request: NextRequest, user) => {
   const { searchParams } = new URL(request.url);
   const range = searchParams.get('range') || undefined;
   const filter = searchParams.get('filter') || undefined;
-  return NextResponse.json(getMetrics(user.organizationId, range, filter));
+  const customStart = searchParams.get('customStart') || undefined;
+  const customEnd = searchParams.get('customEnd') || undefined;
+  return NextResponse.json(getMetrics(user.organizationId, range, filter, customStart, customEnd));
 });

@@ -1,0 +1,129 @@
+================================================================================
+BOULETTEPROOF RWANDA — ANNUAL STRATEGIC REVIEW 2023 & 2024 PLANNING
+================================================================================
+Document Type:  CEO Strategy Memo + Planning Framework
+Author:         Mutabazi Augustine, CEO and Co-Founder
+Date:           January 10, 2024
+Distribution:   Board of Directors, Executive Team (Level 1 Restricted)
+================================================================================
+
+PART ONE: 2023 IN REVIEW — WHAT WE DID AND WHAT WE LEARNED
+
+2023 was the year Bouletteproof Rwanda proved that an African-built AI company can scale. We entered the year with 148 clients and $14.2M ARR. We end it with 240 clients and $18.6M ARR — a 31% revenue increase and 62% client growth. We crossed into profitability in Q3 2023 and have not looked back. More importantly, we built the team, the systems, and the culture that will support us through the next phase of growth. Below is an honest assessment of what worked, what didn't, and what we need to change.
+
+WHAT WORKED IN 2023
+
+1. GOVERNMENT AS A PLATFORM STRATEGY: Our decision to anchor growth in Rwandan government accounts (RDB, MINICT, RRA, MINECOFIN, RSSB) was validated completely. Government clients have a 95%+ renewal rate, pay on time, and serve as reference accounts that open doors in every other sector. The RRA fraud detection ROI story ($8M saved in year one) has become our most powerful sales tool. Every government prospect we meet now asks to speak with Celestin Kayitare at RRA.
+
+2. EAST AFRICAN EXPANSION EXECUTION: We launched in Uganda (2021), Kenya (2022), Tanzania (2023), and Ghana (2023). Each launch was led by a country account executive embedded with local networks. Our playbook — lead with a government anchor or a major bank, then use that reference to grow — is working. Tanzania is our fastest-growing market at $3.1M ARR in its first year.
+
+3. THE DATA SCIENCE TEAM: Sophie Umurerwa and Callixte Rurangirwa built a world-class ML engineering team. Our credit scoring models (Gini 0.68 at BK, 0.72 at NCBA) outperform commercially deployed models from global vendors. Callixte's MLOps platform is now replicable across all banking clients in under 3 weeks — a massive competitive advantage.
+
+4. TRAINING AND ACADEMY GROWTH: This was a sleeper hit. We started Training as a low-cost offering to support client adoption. It became a $1.3M revenue line by year-end and has put us inside 1,700 organizations whose staff have been trained on AIBID. Many of these organizations are self-funded training alumni who later become platform clients.
+
+5. MASTERCARD FOUNDATION PARTNERSHIP: Signing Mastercard Foundation for $750k changed our external positioning fundamentally. We went from "tech startup" to "AI for development company." This opened doors at USAID, GIZ, UNICEF, and the AfDB. Florence Mutesi's NPS score of 85 is our highest ever.
+
+WHAT DIDN'T WORK IN 2023
+
+1. MSME PRODUCT LAUNCH (DELAYED): We planned to launch a self-serve AIBID Lite product for MSMEs in Q3 2023. It was not launched. The engineering team was fully allocated to enterprise client deliverables. This was the right prioritization decision in 2023, but the MSME market is leaving money on the table. 2024 is the year we fix this.
+
+2. GHANA EXPANSION PACE: We signed Ecobank Ghana and launched a training cohort, but the Accra team is only 3 people. We don't have the market presence to pursue the leads that Ecobank is generating. We should have hired a Country Director for Ghana in Q2 2023. Lesson: hire locally before you launch, not after.
+
+3. DRC (RAWBANK) IMPLEMENTATION DELAY: Our Rawbank DRC project took 4 months longer than planned due to French-language localization work that was not scoped in the contract. We underestimated the depth of localization required for Francophone markets. The French AIBID interface is now a product asset, but the cost was one quarter of delayed revenue recognition.
+
+4. USER ADOPTION AT SMALL CLIENTS: Three clients (COGEBANQUE, Airtel Rwanda, I&M Bank — before acquisition) had user adoption rates below 65%. In each case, the pattern was the same: excellent executive buy-in during sales, but no designated power user or internal champion in the operational team. Our onboarding process lacks a formal internal champion identification and activation step. This is now being fixed.
+
+5. TALENT RETENTION AT SENIOR ML LEVEL: We lost Laurent Niyizigiye (Senior ML Engineer, 4 years) to DeepMind's Accra office and two other senior engineers to international remote roles. Losing senior ML engineers is a business risk, not just an HR issue — each departure sets back an active client project. The compensation gap with international tech companies is real and must be addressed structurally.
+
+FINANCIAL SUMMARY 2023
+
+Revenue:              $18.6M (target: $17M) — 9.4% above target
+Gross Margin:         79.2% (target: 78%) — 1.2pp above target
+EBITDA:               $9.2M (margin: 49.5%) — first year with >40% EBITDA
+Net Profit:           $7.8M (first profitable full year)
+New Clients:          92 (target: 85)
+Churned Clients:      19 (churn rate: 7.9% gross; target <10%)
+Net Revenue Retention: 116% (target: 110%) — strong upsell
+Team size EOY:        185 employees (target: 180)
+Countries:            6 (Rwanda, Uganda, Kenya, Tanzania, Ghana, DRC)
+
+================================================================================
+PART TWO: 2024 STRATEGIC PRIORITIES
+================================================================================
+
+PRIORITY 1 — EXECUTE THE MTN GROUP DEAL
+This is the single most important commercial task of 2024. A pan-African MTN deployment would generate $4-7M in new ARR, give us presence in 19 countries overnight, and validate AIBID as an enterprise-grade platform at continental scale. Failure to win this deal would delay our geographic ambitions by 12-18 months. Everything else bends around this.
+Owner: CEO (personally)
+Success Metric: Signed LOI with MTN Group by August 2024.
+
+PRIORITY 2 — LAUNCH AIBID LITE FOR MSMES AND COOPERATIVES
+We cannot afford to ignore the 8 million East African MSMEs for another year. A self-serve freemium product at $50-200/month, launched through MoMo, Airtel Money, and bank partnerships, could add 1,000-3,000 clients in 12 months without a dedicated sales team. This is a product bet, not a sales bet.
+Owner: Martine Mukagasana (CPO)
+Success Metric: 500 paid AIBID Lite subscribers by December 2024.
+
+PRIORITY 3 — SHIP OFFLINE SYNC AND KINYARWANDA VOICE BY Q2 2024
+Field reports from 19 visits in H1 2024 identified offline sync as the #1 feature gap blocking rural adoption. Kinyarwanda voice interface was cited 5 times. These are not feature requests — they are adoption blockers that are preventing us from serving Rwanda's rural economy. If we do not ship these in Q2, our GIZ, MINAGRI, and RBC contracts are at renewal risk.
+Owner: Jean-Paul Amahoro (CTO) + Perpétue Umubyeyi (NLP)
+Success Metric: Offline sync in production by May 31, 2024; Kinyarwanda voice in beta by June 30, 2024.
+
+PRIORITY 4 — RAISE ARR IN EXISTING CLIENT BASE
+With 275 clients entering 2024, upselling and cross-selling to existing accounts should generate $3-5M of new ARR without a single new client. Every account manager has a quarterly upsell target. The AI assistant, generative AI reports, and new sector modules are all upsell vectors. Albert Kayiranga (Client Success Director) to drive this as his primary 2024 objective.
+Owner: Albert Kayiranga (Client Success Director)
+Success Metric: $4M incremental ARR from existing accounts by December 2024.
+
+PRIORITY 5 — BUILD REGIONAL COUNTRY TEAMS (GHANA, DRC)
+Ghana and DRC are our two market launches that are running below potential due to insufficient local presence. In 2024 we hire Country Directors for Accra (Ghana) and Kinshasa (DRC), each with a 3-person team. These hires are critical for the MTN Group deal (MTN operates in both countries) and for Rawbank DRC expansion.
+Owner: Anastase Nsengiyumva (VP Sales) + Jeanne d'Arc Mukashema (HR)
+Success Metric: Ghana Country Director hired by March 31; DRC Country Director hired by June 30; each country at $1M ARR by December 2024.
+
+PRIORITY 6 — OPEN-SOURCE KINYARWANDA NLP MODEL
+Perpétue Umubyeyi's Kinyarwanda speech recognition and NLP models are world-class. Publishing them as open-source will do three things: (1) position Bouletteproof as a contributor to African AI commons; (2) attract top NLP researchers who want to build on our models; (3) generate extraordinary PR coverage at zero cost. This is a strategic PR and talent acquisition move disguised as a technical release.
+Owner: Gaspard Niyibikora (R&D Director) + Perpétue Umubyeyi
+Success Metric: Kinyarwanda NLP models published on Hugging Face by August 2024.
+
+PRIORITY 7 — PREPARE FOR IPO
+This is a 24-month project starting now. Two new independent board members, ESOP for all staff, IFRS audit clean, and Rwanda Stock Exchange relationship maintained. IPO is our 2026 milestone, but the groundwork is all done in 2024-2025.
+Owner: Xaverine Mukankubana (CFO) + External Advisors
+Success Metric: IPO readiness assessment score of >80/100 by PwC by December 2024.
+
+================================================================================
+PART THREE: CULTURE AND VALUES REFRESH
+================================================================================
+
+As we grow from 185 to a projected 220 employees, and from 6 to 10 countries, we risk losing the culture that made us great. I want to be explicit about what I believe our culture is, because I see signs that rapid hiring is diluting it.
+
+WHAT BOULETTEPROOF CULTURE MEANS:
+
+"BOLDLY AFRICAN, GLOBALLY EXCELLENT": We are not a Western company with African offices. We are an African company with global ambitions. Every product decision, every hiring decision, and every partnership should advance the idea that African teams can build world-class AI.
+
+"DATA BEFORE OPINION": We argue with data, not seniority. Any employee, at any level, can challenge a decision if they have data to support their position. The CEO is not exempt from this rule. This is how we stay intellectually honest at scale.
+
+"IMPACT OVER AESTHETICS": A beautiful dashboard that no one uses is a failure. A plain-looking tool that a SACCO in Rulindo uses to prevent portfolio deterioration is a success. We are in the impact business.
+
+"FAIL FAST, DOCUMENT HONESTLY": Our field reports are a model of intellectual honesty — they describe what didn't work without political filtering. This is our competitive advantage in learning. It must extend to all functions.
+
+"PROTECT THE TEAM": We are asking our 200 employees to work on some of the most important problems on the African continent. In return, we owe them competitive pay, career growth, psychological safety, and respect. The 15% senior salary adjustment is not a concession — it is an investment in the people who built this company.
+
+================================================================================
+2024 KEY PERFORMANCE INDICATORS (COMPANY LEVEL)
+================================================================================
+1. ARR:                 $21M by December 31, 2024
+2. Active Clients:      350+
+3. Countries:           10 (add Jordan as MENA beachhead if pilot converts)
+4. Gross Margin:        >81%
+5. EBITDA Margin:       >55%
+6. Employee Count:      220 by December 31
+7. Gender Parity:       48% female employees
+8. NPS (avg):           78+
+9. Attrition:           <8% annualized
+10. AIBID Lite Signups: 500+ paying subscribers
+11. MTN Group:          Signed LOI by August
+12. Open-Source Launch: Kinyarwanda NLP on Hugging Face by August
+
+We are doing something that has never been done before: building an AI company from Africa that serves Africa's needs. Every day we delay is a day that a foreign company builds the tools that will shape African decision-making for the next generation. That is the urgency behind everything in this document.
+
+Let's go.
+
+— Mutabazi Augustine, CEO
+Kigali, January 10, 2024
+================================================================================

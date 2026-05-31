@@ -1,29 +1,28 @@
-# Dataset 1 — Sales Pipeline (CSV)
+# Dataset 1 — Bouletteproof Rwanda Workforce Analytics (CSV)
 
 ## File
-`sales_pipeline.csv` — 51 data rows + 1 header
+`bouletteproof_workforce_analytics.csv` — 200 employee rows + 1 header
+
+## About
+Complete HR dataset for Bouletteproof Rwanda (200-person AI analytics company, Kigali). Covers 10 departments, 8 locations, 12+ nationalities. Includes active employees, resigned staff, and probationers.
 
 ## Columns
+employee_id, full_name, department, job_title, employment_type, hire_date, exit_date, status, location, base_salary_rwf, performance_score_2024, training_hours_ytd, gender, age_group, education_level, years_at_bp, manager, sick_days_2024, annual_leave_taken, active_projects, certifications, nationality
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `deal_name` | string | Name of the sales deal |
-| `company` | string | Account/company name |
-| `stage` | string | Pipeline stage: Discovery, Proposal, Negotiation, Closed Won, Closed Lost |
-| `value_usd` | number | Deal value in US dollars |
-| `close_date` | date | Expected or actual close date |
-| `owner` | string | Sales rep assigned to the deal |
-| `probability` | integer | Win probability (0–100%) |
+## Suggested Test Queries (Voice Control)
+1. "How many employees does Bouletteproof have?"
+2. "What is the average salary in the Engineering department?"
+3. "Which department has the highest average performance score?"
+4. "How many female employees work in Data Science?"
+5. "Show me all employees based in Kigali HQ"
+6. "What is the total monthly salary spend?"
+7. "Which employees have been here more than 3 years?"
+8. "How many employees are currently on probation?"
 
-## Intentional Edge Cases
-- **Rows 44–46** (`Ruby Insurance`, `Sapphire Mining`, `Titan Automotive`): missing `value_usd`, `close_date`, or both
-- **Row 47** (`Willow Financial`): missing `owner`
-- **Rows 50–51** (`Apex Tech Expansion`): exact duplicate rows
-- **Rows 40–43** (`Nova Robotics`, `Opal Hospitality`, `Quartz Architecture`): mixed date formats (`01/15/2025`, `08-10-2024`, `May 3 2024`)
-
-## Suggested Test Queries
-1. *"What is the total pipeline value by stage?"*
-2. *"Show me a bar chart of deal count per sales owner."*
-3. *"Which deals have a missing close date or value?"*
-4. *"What is the weighted pipeline value using the probability column?"*
-5. *"List all Closed Won deals sorted by value descending."*
+## Suggested Test Queries (AI Assistant)
+1. "Which departments are at highest attrition risk based on performance and tenure?"
+2. "Generate a gender pay equity analysis by department"
+3. "Which managers have the highest-performing teams on average?"
+4. "Identify potential flight risks based on low performance and high sick days"
+5. "Compare training hours vs performance scores — is there a correlation?"
+6. "Create a diversity breakdown by nationality, gender, and location"

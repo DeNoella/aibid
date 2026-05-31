@@ -1,0 +1,225 @@
+================================================================================
+BOULETTEPROOF RWANDA — BOARD OF DIRECTORS MEETING
+Q1 2024 MINUTES — CONFIDENTIAL
+================================================================================
+Date:         Thursday, 28 March 2024
+Time:         09:00 – 16:30 EAT
+Venue:        Bouletteproof Rwanda HQ, KG 7 Ave, Kigali Innovation City, Rwanda
+Chairperson:  Mrs. Amara Kourouma (Independent Board Chair)
+Recorded by:  Sylvestre Rutaremara (Company Secretary)
+
+BOARD MEMBERS PRESENT
+─────────────────────────────────────────────────────────────────────────────
+• Mrs. Amara Kourouma — Independent Non-Executive Chair
+• Mr. Mutabazi Augustine — CEO and Co-Founder (Executive Director)
+• Dr. Gaspard Niyibikora — Co-Founder, R&D Director (Executive Director)
+• Ms. Xaverine Mukankubana — CFO (Executive Director)
+• Mr. David Sengeh — Independent Non-Executive Director (via Zoom)
+• Ms. Priya Mathur — Investor Representative, Partech Africa (Non-Executive)
+• Mr. Kofi Boateng — Investor Representative, Development Finance Corp (Non-Executive)
+• Prof. Ingrid Andersson — Independent Non-Executive Director (via Zoom)
+
+APOLOGIES: None
+
+ALSO IN ATTENDANCE: Anastase Nsengiyumva (VP Sales, for agenda item 4),
+Martine Mukagasana (CPO, for agenda item 5), Jeanne d'Arc Mukashema (HR Director, for agenda item 7)
+
+================================================================================
+ITEM 1 — APPROVAL OF PREVIOUS MINUTES
+================================================================================
+Minutes of the Q4 2023 Board Meeting (December 14, 2023) were reviewed. No amendments proposed.
+RESOLVED: Minutes approved unanimously.
+
+================================================================================
+ITEM 2 — CEO REPORT — Q1 2024 PERFORMANCE SUMMARY
+================================================================================
+Mutabazi Augustine presented the Q1 2024 performance highlights.
+
+FINANCIAL PERFORMANCE (Q1 2024 vs Q1 2023):
+• Total Revenue: $4.64M (+21% YoY) [AIBID Platform $1.66M; Custom AI $832k; Data Consulting $638k; Training $355k; Gov Tech $888k]
+• Gross Margin: 80.1% (up from 77.6% in Q1 2023)
+• EBITDA: $2.83M (margin: 61%) — highest quarterly EBITDA in company history
+• ARR: $18.6M (milestone crossed; on track for $25M ARR by year-end)
+• Active Clients: 275 (vs 175 in Q1 2023, +57%)
+• Net Revenue Retention: 118% (all-time high; driven by BK Group 3-year renewal at +25%)
+
+KEY WINS SINCE LAST BOARD MEETING:
+1. KCB Bank Kenya: $520k, 3-year contract signed. Strategic win following I&M Bank acquisition.
+2. African Union Commission: $880k, flagship institutional deal. AUC Chair visited Kigali HQ in person.
+3. Jordan Ministry of Planning: $180k pilot — first Middle East contract; MENA entry confirmed.
+4. Vodacom Tanzania: $460k, enterprise deal secured through CRDB referral.
+
+KEY RISKS FLAGGED:
+1. Equity Bank Rwanda renewal at risk (new CDO unfamiliar with platform). Meeting scheduled for April.
+2. COGEBANQUE user adoption is low (60%) — intervention team deployed.
+3. Airtel Rwanda renewal uncertain — Bharti Group vendor review in progress.
+
+Board Discussion: Ms. Priya Mathur (Partech) raised concern about client concentration — top 5 clients represent 28% of ARR. CEO acknowledged this and noted geographic diversification as mitigation. Mr. Kofi Boateng (DFC) asked about the MENA pipeline; CEO confirmed three additional conversations underway in Saudi Arabia, UAE, and Egypt.
+
+RESOLVED: Board noted the Q1 2024 performance report with satisfaction. CFO to prepare sensitivity analysis on client concentration risk for Q2 board.
+
+================================================================================
+ITEM 3 — FINANCIAL REPORT AND BUDGET REVIEW
+================================================================================
+Xaverine Mukankubana (CFO) presented the financial position.
+
+BALANCE SHEET HIGHLIGHTS (as at 31 March 2024):
+• Cash & Equivalents: $12.4M
+• Accounts Receivable: $3.1M (of which $180k >90 days — government clients)
+• Total Assets: $28.7M
+• Outstanding Debt: $0 (company is debt-free following Series B)
+• Burn Rate: $2.1M/month (gross); Net burn: effectively positive (profitable since Q3 2023)
+
+SERIES B UPDATE:
+• Series B: $18M raised in Q4 2023, led by Partech Africa and Development Finance Corporation
+• $12.4M of $18M still deployed strategically
+• Use of funds: 40% product development; 35% geographic expansion; 15% talent; 10% marketing
+
+FULL YEAR 2024 GUIDANCE REVISION (upward):
+Previous guidance: $18M revenue. Revised: $21M revenue (driven by AUC and KCB deals closing above forecast)
+
+Board Discussion: Prof. Andersson asked about the government receivables. CFO confirmed that government clients in Rwanda pay on time but Tanzania Revenue Authority had one invoice delayed by 45 days due to procurement approval process. No write-off risk.
+
+RESOLVED: 2024 revenue guidance revised upward to $21M. CFO authorised to explore $5M credit facility as a precautionary liquidity buffer.
+
+================================================================================
+ITEM 4 — COMMERCIAL UPDATE — MTN GROUP OPPORTUNITY
+================================================================================
+Anastase Nsengiyumva (VP Sales) joined to present the MTN Group opportunity.
+
+MTN RWANDA RESULTS (evidence base):
+• 14.3% churn reduction confirmed by A/B test (3-month controlled study)
+• ARPU increase of 8% attributable to AI-driven retention interventions
+• 145 active platform users across analytics, network ops, and MoMo business units
+• MTN Rwanda 3-year renewal signed at 20% price increase
+
+MTN GROUP CONVERSATION:
+• MTN Group CDO (Johannesburg) briefed by MTN Rwanda VP Data in February 2024
+• MTN operates in 19 African countries with 290M subscribers
+• Estimated group contract value: $4.2M – $6.8M ARR (depending on tier per country)
+• Current status: MTN Group issued a formal Request for Information (RFI) to Bouletteproof on 15 March 2024
+• Timeline: RFI response due April 30; formal RFP expected June 2024; contract target September 2024
+
+COMPETITIVE RISK: MTN Group is also evaluating Palantir (USA) and a homegrown solution using Google Cloud AI.
+
+BOARD DECISION REQUIRED: Should we dedicate an exclusive deal team to MTN Group?
+
+Board Discussion: Significant discussion followed. Mr. Sengeh cautioned against over-investing in a single prospect. Ms. Mathur (Partech) strongly advocated for full pursuit given the strategic value. Mr. Boateng noted that a DFC recommendation letter to MTN Group could support the pitch.
+
+RESOLVED:
+1. CEO to lead MTN Group engagement personally, supported by Norbert Rugwizangoga (Senior BDM).
+2. DFC to provide formal recommendation letter (Kofi Boateng to arrange by April 15).
+3. Board authorises hiring of one Senior Enterprise Account Director specifically for pan-African telco sector.
+4. Dedicated MTN Group deal team to be formed: CEO, VP Sales, CPO, CTO, one external consultant.
+
+================================================================================
+ITEM 5 — PRODUCT ROADMAP AND AIBID 4.0 UPDATE
+================================================================================
+Martine Mukagasana (CPO) presented the product strategy.
+
+AIBID 3.0 RELEASE STATUS (July 2024 launch milestone):
+• Voice Query (Kinyarwanda): 78% complete — on track
+• Offline Mobile Sync: 62% complete — at risk (field reports highlight urgent need)
+• Generative AI Integration (Claude API): 91% complete — ahead of schedule
+• AIBID Mobile App (iOS/Android): 55% complete — 3-week delay due to Flutter team capacity
+
+AIBID 4.0 VISION (2025):
+• Fully agentic AI — platform proactively surfaces insights and executes low-risk decisions autonomously
+• 30+ pre-built sector modules (Government, Banking, Telco, Agriculture, Health, Education)
+• Multi-language support: Kinyarwanda, Swahili, Hausa, Amharic, French, English, Arabic
+• Real-time streaming analytics (15-minute data refresh for operations use cases)
+• Blockchain-verified data lineage for regulated industries
+
+OPEN-SOURCE COMMITMENT: Perpétue Umubyeyi's Kinyarwanda NLP model to be released as open-source in Q3 2024 — strategic PR move for Pan-African AI positioning.
+
+Board Discussion: Mr. Sengeh (via Zoom) expressed strong support for open-source Kinyarwanda NLP — "this is exactly how Bouletteproof builds the pan-African AI commons." Prof. Andersson asked about the IP implications of open-sourcing. CTO (represented by CEO) confirmed it covers only the NLP model, not the platform.
+
+RESOLVED: AIBID 4.0 roadmap approved. CPO to present a detailed offline sync sprint plan to CTO by April 5 — this is the most critical field blocker and must ship before Q3 2024.
+
+================================================================================
+ITEM 6 — IPO PREPARATION UPDATE (RESTRICTED DISTRIBUTION)
+================================================================================
+Xaverine Mukankubana and CEO presented.
+
+CONTEXT: The board previously approved exploring a dual listing on the Rwanda Stock Exchange (RSE) and London Stock Exchange (LSE) AIM market by 2026. This item covers the preparatory steps underway.
+
+STATUS:
+• PricewaterhouseCoopers Rwanda engaged as IPO readiness advisor (January 2024)
+• Legal counsel: Bowmans Rwanda (local) and Linklaters (international)
+• Target EBITDA for IPO year: $12M+ (projected for 2025 at current growth rate)
+• Revenue target for IPO: $35M+ ARR (projected for 2026)
+• Key pre-IPO risks: client concentration, geographic revenue mix, regulatory risk in some markets
+
+PwC ASSESSMENT SUMMARY:
+1. Financial controls are "IPO ready" — IFRS compliant since 2022.
+2. Governance structure needs two additional independent board members.
+3. Share option plan for staff needs to be formalised and documented.
+4. Rwanda Stock Exchange expressed strong support — first tech company IPO would be historic.
+
+RESOLVED:
+1. Board mandates appointment of 2 independent non-executive directors by Q3 2024 — Nominations Committee to start search immediately.
+2. Employee Share Option Plan to be formalised by Jeanne d'Arc Mukashema by Q2 2024.
+3. Continue IPO preparatory activities under confidentiality — no public disclosure until H1 2025.
+
+================================================================================
+ITEM 7 — PEOPLE & CULTURE REPORT
+================================================================================
+Jeanne d'Arc Mukashema (HR Director) presented.
+
+HEADCOUNT: 200 employees as of March 28, 2024 (milestone reached this quarter)
+• Kigali HQ: 158 | Musanze: 9 | Huye: 8 | Rubavu: 5 | Nyagatare: 5 | Remote: 15
+
+DIVERSITY METRICS:
+• Gender: 44% female (up from 39% in Q1 2023) — target is 50% by 2026
+• Rwandan nationals: 80% | Other African: 14% | International: 6%
+• Average age: 31 years
+
+TALENT HIGHLIGHTS:
+• Perpétue Umubyeyi (Research Lead) accepted invitation to speak at NeurIPS 2024 — company's first major global academic presence
+• Callixte Rurangirwa cited in Forbes Africa 30 Under 30 (May 2024 edition)
+• Sophie Umurerwa (Director of Data Science) promoted to VP level
+
+ATTRITION: 8 departures in Q1 (4% annualized) — below industry average of 18% for African tech sector
+
+TALENT RISKS:
+• Senior ML engineers are being poached by Google, Meta, and DeepMind's Accra offices
+• Compensation gap at senior levels vs. international tech companies: approximately 35-40%
+
+INITIATIVES:
+• "Bouletteproof Academy" internal training program: 85% of staff completed at least 20 training hours YTD
+• New flexible-work policy: staff can work remotely up to 2 days/week
+• Psychological safety survey: 78/100 score (up from 68 in 2022)
+
+RESOLVED: Board approved a 15% salary adjustment for all staff at Senior level and above, effective May 1, 2024, to address competitive compensation gap.
+
+================================================================================
+ITEM 8 — RISK REGISTER REVIEW
+================================================================================
+Top 5 Risks Reviewed by the Board:
+
+1. TECHNOLOGY RISK — Generative AI model costs: Anthropic API costs have risen 28% since Q3 2023. Mitigation: explore model distillation and fine-tuning to reduce inference costs.
+
+2. REGULATORY RISK — Data protection: Kenya Data Protection Act enforcement began January 2024. Tanzania is drafting similar legislation. Rwanda's existing Data Protection Law is compliant. Mitigation: Legal team conducting compliance audit for all East African jurisdictions.
+
+3. COMMERCIAL RISK — Client concentration: Top 5 clients = 28% of ARR. Mitigation: actively diversifying across 12 sectors and 8 countries.
+
+4. PEOPLE RISK — Key person dependency: CEO and 3 co-founders are critical. Mitigation: succession planning initiated; key person insurance being reviewed.
+
+5. GEOPOLITICAL RISK — DRC operations: Political instability in eastern DRC could affect Rawbank operations. Mitigation: contract includes force majeure clause; payments secured via escrow.
+
+RESOLVED: Risk register noted. Legal team to present Kenya/Tanzania data protection compliance report at Q2 board meeting.
+
+================================================================================
+ITEM 9 — ANY OTHER BUSINESS
+================================================================================
+• Chair announced that Bouletteproof Rwanda has been shortlisted for the 2024 Africa Tech Summit Innovation Award in the "AI for Development" category. Ceremony is in Kigali, June 2024.
+• Mr. Sengeh (via Zoom) congratulated the team on crossing 200 employees and the $18M ARR milestone — "A proud moment for African AI."
+• CEO noted that Bouletteproof was invited to present at the UN General Assembly's AI for Good summit in Geneva, September 2024.
+
+================================================================================
+NEXT BOARD MEETING: Thursday, 27 June 2024 — Q2 2024 Review
+================================================================================
+SIGNED:
+Mrs. Amara Kourouma (Chair) _______________    Date: 28 March 2024
+Mr. Mutabazi Augustine (CEO) _______________   Date: 28 March 2024
+================================================================================

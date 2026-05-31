@@ -5,5 +5,7 @@ import { getChartData } from '@/lib/services/dashboard.service';
 export const GET = withAuth((request: NextRequest, user) => {
   const { searchParams } = new URL(request.url);
   const range = searchParams.get('range') || undefined;
-  return NextResponse.json(getChartData(user.organizationId, range));
+  const customStart = searchParams.get('customStart') || undefined;
+  const customEnd = searchParams.get('customEnd') || undefined;
+  return NextResponse.json(getChartData(user.organizationId, range, customStart, customEnd));
 });
