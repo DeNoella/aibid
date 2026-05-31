@@ -26,7 +26,7 @@ Speak these naturally after uploading the file:
 6. *"What is the total monthly salary spend in Rwandan Francs?"*
 7. *"How many employees are currently on probation?"*
 8. *"Which employees have been here more than 3 years?"*
-9. *"Show me employees who resigned"*
+9. *"Show me a list of employees who resigned"*
 10. *"What is the average training hours by department?"*
 
 ### AI Assistant Questions

@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { getDb } from '@/lib/db';
-import { askQuestion, isAIQueryAvailable, type ConversationMessage } from '@/lib/ai-query';
+import { askQuestion, analyzeFileData, isAIQueryAvailable, type ConversationMessage } from '@/lib/ai-query';
 
 export function getConversations(userId: string) {
   const db = getDb();
@@ -39,10 +39,13 @@ export async function sendMessage(conversationId: string, content: string, organ
   let queryData: { answer: string; data: Record<string, unknown>[]; columns: string[]; rowCount: number; fileData?: Record<string, unknown>[] } | null = null;
 
   if (fileContext?.rows?.length) {
-    const rows = fileContext.rows;
-    const columns = fileContext.columns ?? Object.keys(rows[0] ?? {});
-    responseContent = `I've analyzed your attached file "${fileContext.filename}" (${rows.length} rows). ${content}\n\nThe dataset includes: ${columns.join(', ')}. Ask follow-up questions about this data anytime.`;
-    queryData = { answer: responseContent, data: rows.slice(0, 10), columns, rowCount: rows.length, fileData: rows };
+    const result = await analyzeFileData(content, {
+      filename: fileContext.filename,
+      rows: fileContext.rows,
+      columns: fileContext.columns ?? Object.keys(fileContext.rows[0] ?? {}),
+    }, previousMessages);
+    responseContent = result.answer;
+    queryData = result;
   } else if (isAIQueryAvailable()) {
     try {
       const result = await askQuestion(content, organizationId, previousMessages);

@@ -28,15 +28,46 @@ interface VoiceControlProps {
 
 type VoiceMetricFocus = 'revenue' | 'campaigns' | 'clicks' | 'conversion' | 'impressions';
 
+// Preferred female English voice names (order matters — first match wins)
+const FEMALE_VOICE_NAMES = [
+  'Samantha', 'Ava', 'Karen', 'Victoria', 'Fiona', 'Zira',
+  'Google UK English Female', 'Microsoft Zira', 'Microsoft Aria',
+  'Allison', 'Susan', 'Jenny', 'Aria', 'Nova',
+];
+
+function pickFemaleVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  for (const name of FEMALE_VOICE_NAMES) {
+    const match = voices.find(v => v.name.includes(name) && v.lang.startsWith('en'));
+    if (match) return match;
+  }
+  // Fallback: any English voice tagged as female
+  return voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female')) ?? null;
+}
+
 function speak(text: string) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US';
-  utterance.rate = 1.0;
-  utterance.pitch = 1.05;
-  utterance.volume = 1.0;
-  window.speechSynthesis.speak(utterance);
+
+  const doSpeak = (voice: SpeechSynthesisVoice | null) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.2;
+    utterance.volume = 1.0;
+    if (voice) utterance.voice = voice;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length) {
+    doSpeak(pickFemaleVoice(voices));
+  } else {
+    // Voices load asynchronously on first call — wait for them
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak(pickFemaleVoice(window.speechSynthesis.getVoices()));
+    };
+  }
 }
 
 const inferMetricFocus = (text: string): VoiceMetricFocus | null => {
@@ -56,8 +87,6 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
   const [querying, setQuerying] = useState(false);
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [attachedFile, setAttachedFile] = useState<ParsedFileData | null>(null);
-  // Incrementing this key forces FileDropZone to remount with a clean input after each query
-  const [fileZoneKey, setFileZoneKey] = useState(0);
 
   const handleVoiceResult = useCallback(async (result: { transcript: string; isFinal: boolean }) => {
     if (!result.isFinal) return;
@@ -105,9 +134,8 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
         }
         setQueryResult(data);
 
-        // Clear the attached file and reset the drop zone so user can upload another
-        setAttachedFile(null);
-        setFileZoneKey((k) => k + 1);
+        // Keep the file loaded — user can ask follow-up questions without re-uploading.
+        // They can remove it manually with the chip's ✕ button.
 
         // Announce result
         speak("Recorded. Here's what you asked for.");
@@ -185,10 +213,14 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
 
   return (
     <div className="space-y-3">
-      {/* File drop zone — key resets it after each query so user can re-upload */}
-      <FileDropZone key={fileZoneKey} onAttach={setAttachedFile} />
-      {attachedFile && (
-        <FileAttachmentChip data={attachedFile} onRemove={() => setAttachedFile(null)} />
+      {/* Show file chip when a file is loaded; drop zone only when no file is active */}
+      {attachedFile ? (
+        <div className="flex items-center justify-between gap-2 p-3 rounded-lg border border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-800/40">
+          <FileAttachmentChip data={attachedFile} onRemove={() => setAttachedFile(null)} />
+          <span className="text-xs text-muted-foreground">Ask as many questions as you need — file stays loaded.</span>
+        </div>
+      ) : (
+        <FileDropZone onAttach={setAttachedFile} />
       )}
 
       <Card className="p-4">

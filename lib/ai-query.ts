@@ -1,5 +1,6 @@
 import { createQueryGenerator, type QueryResult, type TableSchema } from 'text-db-query-ai';
 import { getDb } from './db';
+import { runFileQuery } from './file-query-engine';
 
 // Define the CRM database schema for the AI query generator
 const crmTables: TableSchema[] = [
@@ -418,4 +419,170 @@ export async function askQuestion(
  */
 export function isAIQueryAvailable(): boolean {
   return getLLMConfig() !== null;
+}
+
+// ─── File data analysis ───────────────────────────────────────────────────────
+
+function computeFileStats(rows: Record<string, unknown>[], columns: string[]): Record<string, unknown> {
+  const numericCols: string[] = [];
+  const categoricalCols: string[] = [];
+
+  for (const col of columns) {
+    const sample = rows.slice(0, 30).map(r => r[col]).filter(v => v != null && v !== '');
+    const numCount = sample.filter(v => !isNaN(Number(v)) && String(v).trim() !== '').length;
+    if (numCount > sample.length * 0.65) numericCols.push(col);
+    else categoricalCols.push(col);
+  }
+
+  const result: Record<string, unknown> = { numericColumns: numericCols, categoricalColumns: categoricalCols };
+
+  for (const col of numericCols) {
+    const vals = rows.map(r => Number(r[col])).filter(v => !isNaN(v));
+    if (!vals.length) continue;
+    const sum = vals.reduce((a, b) => a + b, 0);
+    result[`${col}_summary`] = {
+      avg: Math.round(sum / vals.length),
+      min: Math.min(...vals),
+      max: Math.max(...vals),
+      total: Math.round(sum),
+      count: vals.length,
+    };
+  }
+
+  for (const col of categoricalCols) {
+    const counts: Record<string, number> = {};
+    for (const row of rows) {
+      const val = String(row[col] ?? '(blank)');
+      counts[val] = (counts[val] || 0) + 1;
+    }
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 15);
+    result[`${col}_distribution`] = Object.fromEntries(sorted);
+  }
+
+  // Cross-tabulations: avg of numeric grouped by categorical (the core of analytical questions)
+  const crossTabs: Record<string, unknown> = {};
+  for (const catCol of categoricalCols) {
+    const uniqueVals = [...new Set(rows.map(r => String(r[catCol] ?? '')))].filter(Boolean);
+    if (uniqueVals.length > 20) continue; // skip high-cardinality columns like names
+    for (const numCol of numericCols) {
+      const grouped: Record<string, number[]> = {};
+      for (const row of rows) {
+        const key = String(row[catCol] ?? '');
+        const val = Number(row[numCol]);
+        if (key && !isNaN(val)) {
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(val);
+        }
+      }
+      const avgByGroup: Record<string, number> = {};
+      for (const [k, vals] of Object.entries(grouped)) {
+        avgByGroup[k] = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+      }
+      crossTabs[`avg_${numCol}_by_${catCol}`] = avgByGroup;
+    }
+  }
+  result['cross_tabulations'] = crossTabs;
+
+  return result;
+}
+
+async function callLLMForAnalysis(prompt: string, config: { provider: 'claude' | 'openai'; apiKey: string }): Promise<string> {
+  if (config.provider === 'claude') {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': config.apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1800,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const json = await resp.json();
+    return json.content?.[0]?.text ?? '';
+  } else {
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${config.apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: 1800,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const json = await resp.json();
+    return json.choices?.[0]?.message?.content ?? '';
+  }
+}
+
+/** Build chart data from computed stats as a fallback when AI parsing fails */
+function buildFallbackChartData(
+  question: string,
+  rows: Record<string, unknown>[],
+  stats: Record<string, unknown>
+): { data: Record<string, unknown>[]; columns: string[] } {
+  const cross = stats['cross_tabulations'] as Record<string, Record<string, number>> | undefined;
+  if (cross) {
+    // Find the most relevant cross-tabulation for the question
+    const q = question.toLowerCase();
+    const entry = Object.entries(cross).find(([key]) => {
+      const parts = key.split('_by_');
+      return parts.some(p => q.includes(p.replace(/_/g, ' ')));
+    }) || Object.entries(cross)[0];
+
+    if (entry) {
+      const [, groups] = entry;
+      const data = Object.entries(groups)
+        .map(([label, value]) => ({ label, value }))
+        .sort((a, b) => (b.value as number) - (a.value as number));
+      return { data, columns: ['label', 'value'] };
+    }
+  }
+  // Last resort: return first 10 rows with their columns
+  return { data: rows.slice(0, 10), columns: rows.length > 0 ? Object.keys(rows[0]) : [] };
+}
+
+/**
+ * Analyze an uploaded file by running the in-memory query engine.
+ * No external API call — fast, accurate, always returns specific numbers.
+ * previousMessages are included so follow-up questions get proper context.
+ */
+export async function analyzeFileData(
+  question: string,
+  fileContext: { filename: string; rows: Record<string, unknown>[]; columns: string[] },
+  previousMessages?: ConversationMessage[]
+): Promise<{
+  answer: string;
+  data: Record<string, unknown>[];
+  columns: string[];
+  rowCount: number;
+  fileData: Record<string, unknown>[];
+}> {
+  const { rows, columns } = fileContext;
+
+  // Enrich the question with context from previous turns so follow-ups work
+  let enrichedQuestion = question;
+  if (previousMessages?.length) {
+    const recent = previousMessages.slice(-4)
+      .filter(m => m.role === 'user')
+      .map(m => m.content.slice(0, 120))
+      .join(' | ');
+    if (recent) enrichedQuestion = `${question} (context: ${recent})`;
+  }
+
+  const result = runFileQuery(enrichedQuestion, rows, columns);
+
+  return {
+    answer: result.answer,
+    data: result.data,
+    columns: result.columns,
+    rowCount: rows.length,
+    fileData: rows,
+  };
 }

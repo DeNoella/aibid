@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 
 interface VoiceRecognitionResult {
@@ -19,6 +19,9 @@ interface UseVoiceRecognitionReturn {
   requestPermission: () => Promise<void>;
 }
 
+// Silence after which the accumulated transcript is treated as the final question
+const SILENCE_TIMEOUT_MS = 2200;
+
 export const useVoiceRecognition = (
   onResult?: (result: VoiceRecognitionResult) => void
 ): UseVoiceRecognitionReturn => {
@@ -28,179 +31,187 @@ export const useVoiceRecognition = (
   const [isSupported, setIsSupported] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+
   const recognitionRef = useRef<any>(null);
+  // Accumulated text across multiple utterances in one session
+  const accumulatedRef = useRef('');
+  const lastConfidenceRef = useRef(0);
+  // Timer that fires after SILENCE_TIMEOUT_MS of no new speech
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
+
+  const clearSilenceTimer = () => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  };
+
+  const fireFinal = useCallback(() => {
+    clearSilenceTimer();
+    const full = accumulatedRef.current.trim();
+    if (!full) return;
+    onResultRef.current?.({
+      transcript: full,
+      confidence: lastConfidenceRef.current,
+      isFinal: true,
+    });
+    accumulatedRef.current = '';
+    try { recognitionRef.current?.stop(); } catch { /* ignore */ }
+    setIsListening(false);
+  }, []);
+
+  const resetSilenceTimer = useCallback(() => {
+    clearSilenceTimer();
+    silenceTimerRef.current = setTimeout(fireFinal, SILENCE_TIMEOUT_MS);
+  }, [fireFinal]);
 
   useEffect(() => {
-    // Check if browser supports Web Speech API
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      setIsSupported(true);
-      
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+    const SpeechRec =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-      recognitionRef.current.onresult = (event: any) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          const transcriptPiece = result[0].transcript;
-          
-          if (result.isFinal) {
-            finalTranscript += transcriptPiece + ' ';
-            if (i >= event.resultIndex) {
-              setConfidence(result[0].confidence);
-              if (onResult) {
-                onResult({
-                  transcript: transcriptPiece,
-                  confidence: result[0].confidence,
-                  isFinal: true
-                });
-              }
-
-              // Stop automatically after a completed utterance.
-              // This prevents endless listening after user stops speaking.
-              try {
-                recognitionRef.current.stop();
-              } catch {
-                // Ignore stop race conditions.
-              }
-              setIsListening(false);
-            }
-          } else {
-            interimTranscript += transcriptPiece;
-          }
-        }
-
-        setTranscript((finalTranscript + interimTranscript).trim());
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.warn('Speech recognition error:', event.error);
-        setIsListening(false);
-        
-        // Handle different error types
-        if (event.error === 'not-allowed') {
-          setError('Microphone access denied. Please allow microphone permissions.');
-          setHasPermission(false);
-          toast.error('Microphone Access Denied', {
-            description: 'Please allow microphone access in your browser settings to use voice control.',
-            duration: 5000
-          });
-        } else if (event.error === 'no-speech') {
-          setError('No speech detected. Please try again.');
-          toast.error('No Speech Detected', {
-            description: 'Please speak clearly and try again.'
-          });
-        } else if (event.error === 'network') {
-          setError('Network error. Please check your connection.');
-          toast.error('Network Error', {
-            description: 'Please check your internet connection.'
-          });
-        } else if (event.error === 'aborted') {
-          // User stopped manually, don't show error
-          setError(null);
-        } else {
-          setError(`Speech recognition error: ${event.error}`);
-          toast.error('Voice Control Error', {
-            description: `Error: ${event.error}`
-          });
-        }
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onstart = () => {
-        setError(null);
-        setHasPermission(true);
-      };
-    } else {
+    if (!SpeechRec) {
       setIsSupported(false);
+      return;
     }
 
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          // Ignore errors on cleanup
+    setIsSupported(true);
+
+    const recognition = new SpeechRec();
+    recognitionRef.current = recognition;
+
+    // Keep listening until we detect silence — this gives users time for full questions
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setError(null);
+      setHasPermission(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      let interimText = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        const piece = result[0].transcript;
+
+        if (result.isFinal) {
+          accumulatedRef.current += piece + ' ';
+          lastConfidenceRef.current = result[0].confidence || 0;
+          setConfidence(result[0].confidence || 0);
+          // Reset the silence timer on every new final word
+          resetSilenceTimer();
+        } else {
+          interimText += piece;
+          // Also reset on interim results so fast speakers get enough time
+          resetSilenceTimer();
         }
       }
+
+      setTranscript((accumulatedRef.current + interimText).trim());
     };
-  }, [onResult]);
+
+    recognition.onerror = (event: any) => {
+      clearSilenceTimer();
+      setIsListening(false);
+
+      if (event.error === 'not-allowed') {
+        setError('Microphone access denied. Please allow microphone permissions.');
+        setHasPermission(false);
+        toast.error('Microphone Access Denied', {
+          description: 'Allow microphone access in your browser settings.',
+          duration: 5000,
+        });
+      } else if (event.error === 'no-speech') {
+        // Suppress no-speech in continuous mode — just keep waiting
+        setError(null);
+      } else if (event.error === 'network') {
+        setError('Network error. Please check your connection.');
+        toast.error('Network Error', { description: 'Please check your internet connection.' });
+      } else if (event.error === 'aborted') {
+        setError(null);
+      } else {
+        setError(`Speech recognition error: ${event.error}`);
+      }
+    };
+
+    recognition.onend = () => {
+      // If we ended while still expecting more (e.g. browser cut off), restart
+      if (isListening && accumulatedRef.current.trim()) {
+        // Already have some text — fire immediately
+        fireFinal();
+      } else if (isListening) {
+        // Restart silently so the user can continue speaking
+        try { recognition.start(); } catch { setIsListening(false); }
+      }
+    };
+
+    return () => {
+      clearSilenceTimer();
+      try { recognition.stop(); } catch { /* ignore */ }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const requestPermission = async () => {
     try {
-      // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop the stream immediately, we just needed permission
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach(t => t.stop());
       setHasPermission(true);
       setError(null);
-      toast.success('Microphone Access Granted', {
-        description: 'You can now use voice control.'
-      });
-    } catch (err) {
+      toast.success('Microphone Access Granted');
+    } catch {
       setHasPermission(false);
       setError('Microphone access denied. Please check your browser settings.');
       toast.error('Permission Denied', {
-        description: 'Please allow microphone access in your browser settings.',
-        duration: 5000
+        description: 'Allow microphone access in your browser settings.',
+        duration: 5000,
       });
     }
   };
 
   const startListening = async () => {
-    if (recognitionRef.current && !isListening) {
-      setTranscript('');
-      setConfidence(0);
-      setError(null);
-      
-      try {
-        // Check for permission first
-        if (hasPermission === null || hasPermission === false) {
-          await requestPermission();
-        }
-        
-        recognitionRef.current.start();
+    if (!recognitionRef.current || isListening) return;
+    accumulatedRef.current = '';
+    setTranscript('');
+    setConfidence(0);
+    setError(null);
+    clearSilenceTimer();
+
+    try {
+      if (hasPermission === null || hasPermission === false) {
+        await requestPermission();
+      }
+      recognitionRef.current.start();
+      setIsListening(true);
+    } catch (err: any) {
+      if (err.name === 'InvalidStateError') {
         setIsListening(true);
-      } catch (err: any) {
-        if (err.name === 'InvalidStateError' || err.message?.includes('already started')) {
-          setIsListening(true);
-          return;
-        }
-        
-        console.warn('Error starting recognition:', err);
-        setError('Failed to start voice recognition. Please try again.');
-        setIsListening(false);
-        
-        if (err.message?.includes('not-allowed') || err.name === 'NotAllowedError') {
-          setHasPermission(false);
-          toast.error('Microphone Access Required', {
-            description: 'Please allow microphone access to use voice control.',
-            duration: 5000
-          });
-        }
+        return;
+      }
+      setError('Failed to start voice recognition. Please try again.');
+      setIsListening(false);
+      if (err.name === 'NotAllowedError') {
+        setHasPermission(false);
+        toast.error('Microphone Access Required', { duration: 5000 });
       }
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current && isListening) {
-      try {
-        recognitionRef.current.stop();
-        setIsListening(false);
-      } catch (err) {
-        console.warn('Error stopping recognition:', err);
-        setIsListening(false);
-      }
+    clearSilenceTimer();
+    // If there's accumulated text, fire the result before stopping
+    if (accumulatedRef.current.trim()) {
+      const full = accumulatedRef.current.trim();
+      onResultRef.current?.({ transcript: full, confidence: lastConfidenceRef.current, isFinal: true });
+      accumulatedRef.current = '';
     }
+    try { recognitionRef.current?.stop(); } catch { /* ignore */ }
+    setIsListening(false);
   };
 
   return {
@@ -212,6 +223,6 @@ export const useVoiceRecognition = (
     confidence,
     error,
     hasPermission,
-    requestPermission
+    requestPermission,
   };
 };

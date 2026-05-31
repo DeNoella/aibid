@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/api-utils';
-import { askQuestion, isAIQueryAvailable } from '@/lib/ai-query';
+import { askQuestion, analyzeFileData, isAIQueryAvailable } from '@/lib/ai-query';
 
 export const POST = withAuth(async (request: NextRequest, user) => {
   const body = await request.json();
@@ -10,17 +10,12 @@ export const POST = withAuth(async (request: NextRequest, user) => {
   }
 
   if (fileContext?.rows?.length) {
-    const rows = fileContext.rows as Record<string, unknown>[];
-    const columns = (fileContext.columns as string[]) ?? Object.keys(rows[0] ?? {});
-    const answer = `Based on your uploaded file "${fileContext.filename}" (${rows.length} rows sampled), here is an analysis of your question: "${question}". The dataset contains columns: ${columns.join(', ')}.`;
-    return NextResponse.json({
-      question,
-      answer,
-      data: rows.slice(0, 10),
-      columns,
-      rowCount: rows.length,
-      fileData: rows,
+    const result = await analyzeFileData(question, {
+      filename: fileContext.filename,
+      rows: fileContext.rows as Record<string, unknown>[],
+      columns: (fileContext.columns as string[]) ?? Object.keys((fileContext.rows[0] as Record<string, unknown>) ?? {}),
     });
+    return NextResponse.json({ question, ...result });
   }
 
   if (!isAIQueryAvailable()) {

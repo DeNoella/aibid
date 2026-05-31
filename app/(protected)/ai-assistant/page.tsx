@@ -96,6 +96,8 @@ export default function AIAssistantPage() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [attachedFile, setAttachedFile] = useState<ParsedFileData | null>(null);
+  // Persists the loaded file across follow-up questions in the same session
+  const [activeFileData, setActiveFileData] = useState<ParsedFileData | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('chat');
 
@@ -156,6 +158,7 @@ export default function AIAssistantPage() {
       }));
       setMessages(loaded.length ? loaded : [WELCOME_MESSAGE]);
       setConversationId(conv.id);
+      setActiveFileData(null); // clear file context when switching conversations
       setActiveTab('chat');
     } catch {
       toast.error('Could not load conversation');
@@ -170,6 +173,7 @@ export default function AIAssistantPage() {
     setConversationId(null);
     setInput('');
     setAttachedFile(null);
+    setActiveFileData(null);
     setActiveTab('chat');
   };
 
@@ -213,13 +217,20 @@ export default function AIAssistantPage() {
     try {
       const convId = await ensureConversation(question);
       const payload: Record<string, unknown> = { content: question };
-      if (attachedFile) {
+
+      // Use the newly attached file OR the one already loaded for this session
+      const fileForQuery = attachedFile ?? activeFileData;
+      if (fileForQuery) {
         payload.fileContext = {
-          filename: attachedFile.filename,
-          columns: attachedFile.columns,
-          rows: attachedFile.rows,
+          filename: fileForQuery.filename,
+          columns: fileForQuery.columns,
+          rows: fileForQuery.rows,
         };
-        setAttachedFile(null);
+        if (attachedFile) {
+          // Promote newly attached file to the active session file
+          setActiveFileData(attachedFile);
+          setAttachedFile(null);
+        }
       }
 
       const result = await api.post<{
@@ -451,8 +462,21 @@ export default function AIAssistantPage() {
 
             {/* Input row */}
             <div className="border-t border-neutral-200 dark:border-neutral-700 p-4 space-y-2">
+              {/* Newly attached file (pending) */}
               {attachedFile && (
                 <FileAttachmentChip data={attachedFile} onRemove={() => setAttachedFile(null)} />
+              )}
+              {/* Active session file — persists across follow-up questions */}
+              {!attachedFile && activeFileData && (
+                <div className="flex items-center justify-between text-xs text-muted-foreground bg-neutral-50 dark:bg-neutral-800/60 rounded-lg px-3 py-1.5">
+                  <span>📎 Using <strong>{activeFileData.filename}</strong> for this conversation</span>
+                  <button
+                    type="button"
+                    className="ml-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setActiveFileData(null)}
+                    title="Remove dataset from session"
+                  >✕</button>
+                </div>
               )}
               <div className="flex gap-2">
                 <FileAttachmentButton onAttach={setAttachedFile} className="shrink-0" />
