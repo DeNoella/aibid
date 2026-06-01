@@ -1,199 +1,185 @@
 # AIBID Test Datasets — Bouletteproof Rwanda
-## Demo Question Guide
+## Complete Feature Demo & Question Guide
 
-This folder contains 5 datasets representing real-world data from **Bouletteproof Rwanda**, a 200-person AI analytics company headquartered in Kigali. Use these datasets to demonstrate the AIBID platform's Voice Control and AI Assistant capabilities.
+Five datasets from **Bouletteproof Rwanda** (a 200-person AI analytics company in Kigali). Every question below is verified to work with the current system. Upload a file, then ask.
 
-### How to use
-1. Go to **Dashboard → Voice Query** section
-2. Upload a dataset file using the file drop zone
-3. Click **Start Voice Control** and ask a question below
-4. OR go to **AI Assistant** and attach a file, then type or speak your question
+**Supported file types:** `.csv` · `.xlsx` · `.json` · `.jsonl`
+
+---
+
+## How the two AI features behave (read this first)
+
+**🎙️ Voice Control** (Dashboard → Voice Query)
+- **No file loaded** → spoken phrases act as *dashboard commands* (change views, focus metrics, refresh).
+- **File loaded** → *every* spoken phrase is treated as a **question about your data** and is answered from the file with an answer + table + chart. The four dashboard cards update from the answer.
+
+**💬 AI Assistant** (AI Assistant page)
+- Always answers your typed/spoken question from the attached file.
+- Remembers the conversation in the same session, keeps the file loaded for follow-ups, and saves every chat under **Chat History**.
+
+> Tip for grouped comparisons: phrase them as **"average X by Y"** or **"compare X across Y"** (not "which Y has the highest X"). The answer already tells you the highest and lowest.
+
+---
+
+## ✅ Feature Showcase — one question per feature
+
+| Feature | Upload | Ask this |
+|---|---|---|
+| Voice dashboard command | *(no file)* | "Show revenue" / "Switch to monthly view" / "Refresh" |
+| Voice data question + chart | Dataset 1 | "What is the average salary by department?" |
+| Auto **bar** chart (comparison) | Dataset 1 | "Compare average performance score across departments" |
+| Auto **line** chart (trend) | Dataset 2 | "Show the revenue trend by year" |
+| Auto **pie** chart (distribution) | Dataset 1 | "What is the distribution of employees by education level?" |
+| Dashboard **Revenue** card reacts | Dataset 2 | "What is the total revenue by region?" |
+| Dashboard **Active Clients** card reacts | Dataset 2 | "How many active clients are there in total?" |
+| AI Assistant + follow-up memory | Dataset 1 | "Average salary by department" → then "Which one is lowest?" |
+| Chat history | Dataset 1 | Ask anything, then open the **Chat History** tab |
 
 ---
 
 ## Dataset 1 — Workforce Analytics
-**File:** `test-data/dataset1_csv/bouletteproof_workforce_analytics.csv`
-**Format:** CSV · 200 rows · 22 columns
-**About:** Full HR dataset — employees, salaries (RWF), performance scores, training hours, departments, locations, nationalities
+**File:** `test-data/dataset1_csv/bouletteproof_workforce_analytics.csv` · CSV · 200 rows
+**Key columns:** department, job_title, status, location, gender, age_group, education_level, nationality, base_salary_rwf, performance_score_2024, training_hours_ytd, years_at_bp, sick_days_2024, active_projects
 
-### Voice Control Questions
-Speak these naturally after uploading the file:
-1. *"How many employees does Bouletteproof have?"*
-2. *"What is the average salary in the Engineering department?"*
-3. *"Which department has the highest average performance score?"*
-4. *"How many female employees work in Data Science?"*
-5. *"Show me all employees based in Kigali HQ"*
-6. *"What is the total monthly salary spend in Rwandan Francs?"*
-7. *"How many employees are currently on probation?"*
-8. *"Which employees have been here more than 3 years?"*
-9. *"Show me a list of employees who resigned"*
-10. *"What is the average training hours by department?"*
+### Counts & distributions (→ pie / bar)
+1. "How many employees are there in each department?"
+2. "What is the distribution of employees by gender?"
+3. "What is the distribution of employees by education level?"
+4. "How many employees are in each location?"
+5. "How many employees are there in each nationality?"
 
-### AI Assistant Questions
-Type or speak these for deeper analysis:
-1. *"Which departments are at highest attrition risk based on performance scores and tenure?"*
-2. *"Generate a gender pay equity analysis — are male and female employees paid the same for equivalent roles?"*
-3. *"Which managers have the best-performing teams on average?"*
-4. *"Identify employees who might be flight risks based on low performance and high sick days"*
-5. *"Is there a correlation between training hours and performance score?"*
-6. *"Create a diversity report by nationality, gender, and location"*
-7. *"Compare average salaries across all 10 departments and highlight the gap"*
-8. *"Who are the top 10 highest-earning employees and what do they have in common?"*
-9. *"Which locations outside Kigali HQ have the most employees?"*
-10. *"Show me the distribution of education levels across the company"*
+### Averages & comparisons (→ bar)
+6. "What is the average salary by department?"
+7. "Compare average performance score across departments"
+8. "What is the average training hours by department?"
+9. "What is the average salary by education level?"
+
+### Totals
+10. "What is the total salary spend across the company?"
+11. "What is the total training hours by department?"
+
+### Top / ranking
+12. "Top 10 employees by salary"
+13. "Top 5 employees by performance score"
+14. "Top 5 employees by training hours"
+
+### Filters
+15. "Which employees have a performance score above 4.5?"
+16. "Which employees have more than 50 training hours?"
+17. "Which employees are in the Engineering department?"
+18. "List employees based in Musanze"
+19. "List employees with the status resigned"
+
+### Correlation
+20. "Is there a correlation between training hours and performance score?"
 
 ---
 
 ## Dataset 2 — Financial Performance
-**File:** `test-data/dataset2_xlsx/bouletteproof_financial_performance.csv`
-**Format:** CSV · 80 rows · 28 columns
-**About:** Quarterly P&L by product line (2021–2024) — revenue, margins, ARR, MRR, clients, CAC, LTV, burn rate, NPS across 5 product lines and 4 years
+**File:** `test-data/dataset2_xlsx/bouletteproof_financial_performance.csv` · CSV · 80 rows
+**Key columns:** year, quarter, month, product_line, region, revenue_usd, gross_profit_usd, gross_margin_pct, ebitda_usd, net_income_usd, new_clients, active_clients, arr_usd, mrr_usd, nps_score, cac_usd, ltv_usd, ltv_cac_ratio
 
-### Voice Control Questions
-1. *"What was total revenue in Q3 2024?"*
-2. *"Which product line generated the most revenue overall?"*
-3. *"What is the current monthly recurring revenue for the AIBID Platform?"*
-4. *"How many new clients were acquired in Q1 2024?"*
-5. *"What is the gross margin for Custom AI Solutions?"*
-6. *"Show me revenue growth year over year from 2021 to 2024"*
-7. *"What is the LTV to CAC ratio for Training and Academy?"*
-8. *"Which quarter had the highest EBITDA?"*
-9. *"How many total active clients do we have in Q3 2024?"*
-10. *"What was the average NPS score across all product lines in 2023?"*
+> In Voice Control these work because once a file is loaded, words like "revenue"/"year" are treated as part of your question, not dashboard commands.
 
-### AI Assistant Questions
-1. *"Compare profitability across all five product lines over the full 4-year period"*
-2. *"Which product line has improved its gross margin the most since 2021?"*
-3. *"Analyse the trend in customer acquisition cost — is it getting cheaper or more expensive?"*
-4. *"Which region is growing the fastest and should receive the most investment?"*
-5. *"What is the relationship between headcount and revenue per employee over time?"*
-6. *"Which product line has the best LTV to CAC ratio and why does it matter?"*
-7. *"Project Q4 2024 revenue for each product line based on growth trajectories"*
-8. *"Identify the quarters where EBITDA margin exceeded 60% and what drove that"*
-9. *"Compare Q1 2021 vs Q3 2024 — how has the business transformed?"*
-10. *"Build a summary of all key financial milestones from 2021 to 2024"*
+### Trends over time (→ line)
+1. "Show the revenue trend by year"
+2. "What is the total revenue by quarter?"
+3. "Show the EBITDA trend by year"
+
+### Comparisons (→ bar)
+4. "Compare total revenue across product lines"
+5. "What is the total revenue by region?"
+6. "What is the average gross margin by product line?"
+7. "Compare average NPS score across product lines"
+8. "What is the average LTV to CAC ratio by product line?"
+
+### Totals & counts
+9. "What is the total revenue across all records?"
+10. "How many active clients are there in total?"
+11. "What is the total number of new clients by year?"
+
+### Top / ranking & filters
+12. "Top 5 records by revenue"
+13. "Which records have revenue above 1000000?"
+14. "Which records have a gross margin above 80?"
 
 ---
 
 ## Dataset 3 — Client Portfolio
-**File:** `test-data/dataset3_json/bouletteproof_client_portfolio.json`
-**Format:** JSON · 35 client objects · nested fields
-**About:** Complete client portfolio — contract values, KPIs (NPS, adoption rate, delivery), renewal dates, risk flags, upsell opportunities, sector breakdown across 12 countries
+**File:** `test-data/dataset3_json/bouletteproof_client_portfolio.json` · JSON · 35 clients
+**Queryable columns:** sector, country, status, partnership_type, account_manager, contract_value_usd, monthly_value_usd, renewal_probability_pct, total_lifetime_value_usd, organization, short_name
 
-### Voice Control Questions
-1. *"How many active clients do we have?"*
-2. *"What is the total contract value of all government sector clients?"*
-3. *"Which client has the highest NPS score?"*
-4. *"How many clients are at risk of churning?"*
-5. *"What is the average user adoption rate across all clients?"*
-6. *"Which country has the most clients?"*
-7. *"Show me all clients with a renewal probability below 80%"*
-8. *"What is the total monthly value of all active contracts?"*
-9. *"Which sector generates the most total contract value?"*
-10. *"How many clients have data quality risk flags?"*
+### Counts & distributions (→ pie / bar)
+1. "How many clients are in each sector?"
+2. "What is the distribution of clients by country?"
+3. "What is the distribution of clients by status?"
+4. "How many clients does each account manager handle?"
 
-### AI Assistant Questions
-1. *"Which clients are at highest risk of non-renewal — rank them by risk based on NPS, adoption rate, and renewal date"*
-2. *"Analyse our client concentration risk — are we over-dependent on any single sector or country?"*
-3. *"Which sectors generate the most total contract value and where should we focus business development?"*
-4. *"Create a client health scorecard ranking all clients from healthiest to most at-risk"*
-5. *"What are the top 5 upsell opportunities across the portfolio by estimated value?"*
-6. *"Summarise all risk flags across the portfolio and recommend actions"*
-7. *"Which clients have the highest total lifetime value and what made those relationships successful?"*
-8. *"Compare government clients vs commercial clients on NPS, adoption, and renewal probability"*
-9. *"Which account managers have the highest-performing portfolios on average?"*
-10. *"Identify clients where on-time delivery is below 90% and analyse the pattern"*
+### Totals & averages
+5. "What is the total contract value by sector?"
+6. "What is the total monthly value by sector?"
+7. "What is the average contract value by sector?"
+8. "Compare total lifetime value across sectors"
+
+### Top / ranking & filters
+9. "Top 5 clients by contract value"
+10. "Top 5 clients by total lifetime value"
+11. "Which clients have a renewal probability below 80?"
+12. "Which clients have a contract value above 400000?"
 
 ---
 
 ## Dataset 4 — Field Operations Reports
-**File:** `test-data/dataset4_jsonl/bouletteproof_field_reports.jsonl`
-**Format:** JSON Lines · 20 reports · long narrative text + structured fields
-**About:** Field officer visit reports across Rwanda — agriculture, health, finance, government, tourism sectors. Includes narratives, GPS coordinates, beneficiary counts, recommendations, sentiment
+**File:** `test-data/dataset4_jsonl/bouletteproof_field_reports.jsonl` · JSON Lines · 20 reports
+**Queryable columns:** region, district, sector, field_officer, supervisor, sentiment, activity_type, beneficiary_count, photos_taken
 
-### Voice Control Questions
-1. *"How many field reports were submitted in 2024?"*
-2. *"Which region has the most field activity?"*
-3. *"How many total beneficiaries were reached across all field reports?"*
-4. *"What percentage of reports flagged data quality issues?"*
-5. *"Which field officer submitted the most reports?"*
-6. *"How many reports have follow-up required?"*
-7. *"Which sector had the most field visits?"*
-8. *"How many reports had a very positive sentiment?"*
-9. *"How many photos were taken across all field visits?"*
-10. *"Which district had the most field reports?"*
+### Counts & distributions
+1. "How many reports are there for each region?"
+2. "How many field reports did each field officer submit?"
+3. "What is the distribution of reports by sentiment?"
+4. "How many reports are there per sector?"
+5. "How many reports are there per district?"
 
-### AI Assistant Questions
-1. *"Summarise the top 5 recurring issues identified across all field reports"*
-2. *"Which field activities produced the most positive outcomes and what can we learn from them?"*
-3. *"What are the most frequently requested product improvements mentioned by field officers?"*
-4. *"Analyse the sentiment across all reports — which districts show the most challenges?"*
-5. *"Extract all pending follow-up actions and group them by responsible person or team"*
-6. *"Which sectors are underserved by the current field coverage and need more visits?"*
-7. *"Summarise all recommendations made by field officers and group them by theme"*
-8. *"What does the data say about rural connectivity challenges and how is AIBID responding?"*
-9. *"Which single field visit had the highest strategic impact and why?"*
-10. *"Compare the early 2024 field reports vs more recent ones — is the sentiment improving?"*
+### Totals & comparisons
+6. "What is the total number of beneficiaries by region?"
+7. "What is the total beneficiaries by sector?"
+8. "What is the total photos taken by region?"
+9. "What is the average beneficiary count by sector?"
+
+### Top / ranking & filters
+10. "Top 5 reports by beneficiary count"
+11. "Which reports reached more than 100 beneficiaries?"
 
 ---
 
-## Dataset 5 — Strategic Documents
-**Files:** `test-data/dataset5_txt/bouletteproof_strategy/`
-- `board_meeting_q1_2024.txt` — Board of Directors meeting minutes, Q1 2024
-- `market_analysis_east_africa_2024.txt` — East Africa AI market analysis report
-- `annual_strategy_review_2023.txt` — CEO annual strategy memo and 2024 planning
+## Dataset 5 — Strategy Document Index
+**File:** `test-data/dataset5_txt/bouletteproof_strategy/index.csv` · CSV · document catalogue
+**Queryable columns:** document_type, classification, author, date, title
 
-**Format:** Unstructured text · rich narrative content
-**Best used with:** AI Assistant (paste or upload text content)
+1. "How many documents are there of each type?"
+2. "What is the distribution of documents by classification?"
+3. "How many documents did each author write?"
 
-### AI Assistant Questions — Board Minutes
-1. *"Summarise the key decisions made in the Q1 2024 board meeting"*
-2. *"What was the company's financial performance in Q1 2024?"*
-3. *"What is the MTN Group deal and why is it described as critical?"*
-4. *"Extract all action items from the board meeting with their owners and deadlines"*
-5. *"What were the top risks identified and what are the mitigation plans?"*
-6. *"What did the board say about IPO preparation?"*
-7. *"Who attended the board meeting and what role does each person play?"*
-8. *"What salary decisions were made for employees at the board meeting?"*
-
-### AI Assistant Questions — Market Analysis
-1. *"What is the Total Addressable Market for AI analytics in East Africa by 2028?"*
-2. *"Who are Bouletteproof's main competitors and what are their weaknesses?"*
-3. *"What are the top 5 growth drivers for the East Africa analytics market?"*
-4. *"What competitive advantages does Bouletteproof have over Microsoft Power BI and Tableau?"*
-5. *"What are the three biggest strategic opportunities identified in the market analysis?"*
-6. *"What is the 2026 market share target and what would it take to achieve it?"*
-7. *"Which market segment is growing the fastest and why?"*
-
-### AI Assistant Questions — Annual Strategy Review
-1. *"What were the top 3 things that worked well in 2023?"*
-2. *"What failed or underperformed in 2023 and what lessons were learned?"*
-3. *"What are the 7 strategic priorities for 2024 and who owns each one?"*
-4. *"What does the CEO say about Bouletteproof's company culture?"*
-5. *"What is the 2024 revenue target and what are the key assumptions behind it?"*
-6. *"What is the MSME strategy and why was it delayed in 2023?"*
-7. *"Why does the CEO say the open-source Kinyarwanda NLP release is a strategic move?"*
-8. *"How does the CEO describe the urgency of what Bouletteproof is doing?"*
+> The full strategy write-ups (`board_meeting_q1_2024.txt`, `market_analysis_east_africa_2024.txt`, `annual_strategy_review_2023.txt`) are reference reading. The **index.csv** above is the queryable dataset.
 
 ---
 
-## Power Demo Sequence (impress an audience in 5 minutes)
+## 🎙️ Voice Control — Dashboard Commands (use with NO file loaded)
 
-**Step 1 — Upload workforce data, then say:**
-> *"How many female employees do we have in Data Science and what is their average performance score?"*
-
-**Step 2 — Upload financial data, then say:**
-> *"Which product line has grown its revenue the most from 2021 to 2024?"*
-
-**Step 3 — Upload client portfolio JSON, then ask AI Assistant:**
-> *"Which of our clients are most at risk of churning and what should we do about it?"*
-
-**Step 4 — Paste board minutes into AI Assistant, then ask:**
-> *"What are the most important decisions from this board meeting?"*
-
-**Step 5 — Upload field reports, then say:**
-> *"What are the biggest product gaps that field officers keep mentioning?"*
+These control the dashboard itself:
+- "Show revenue" · "Show campaign analytics" · "Show profit" · "Show cost"
+- "Switch to weekly view" · "Show monthly view" · "Show quarterly data"
+- "Refresh the dashboard"
+- "Export the data"
+- "Reset"
 
 ---
 
-*All datasets are fictional but based on realistic Bouletteproof Rwanda scenarios. Generated for AIBID platform demonstration purposes.*
+## 30-Second Demo Script
+
+1. **Voice command:** with no file, say *"Show revenue"* → dashboard reacts.
+2. **Upload Dataset 1**, start voice, ask *"What is the average salary by department?"* → spoken answer + bar chart; ask again *"What is the distribution of employees by gender?"* → pie chart. (Proves follow-up questions work without refreshing.)
+3. **Upload Dataset 2** in the AI Assistant, ask *"Show the revenue trend by year"* → line chart + table, **Revenue MTD** card updates. Follow up *"How many active clients are there in total?"* → **Active Clients** card updates.
+4. Open **Chat History** → your conversation is saved and re-openable.
+
+*All datasets are fictional, built for AIBID demonstration.*

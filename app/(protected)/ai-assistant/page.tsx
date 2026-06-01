@@ -39,6 +39,8 @@ interface QueryData {
   columns: string[];
   rowCount: number;
   fileData?: Record<string, unknown>[];
+  chartType?: 'bar' | 'line' | 'pie';
+  showChart?: boolean;
 }
 
 interface Message {
@@ -416,17 +418,13 @@ export default function AIAssistantPage() {
                       )}
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
 
-                      {/* Visualization for file data */}
-                      {message.type === 'assistant' && message.queryData?.fileData && message.queryData.fileData.length > 0 && (
+                      {/* Chart built from the AGGREGATED result (clean label/value pairs),
+                          using the engine's chosen chart type — never from raw rows. */}
+                      {message.type === 'assistant' && message.queryData
+                        && (message.queryData.showChart ?? message.queryData.data.length >= 2)
+                        && message.queryData.data.length >= 2 && (
                         <InlineDataChart
-                          type={inferChartType(message.content, message.queryData.fileData)}
-                          data={message.queryData.fileData}
-                        />
-                      )}
-                      {/* Visualization for database query data */}
-                      {message.type === 'assistant' && message.queryData && !message.queryData.fileData && message.queryData.data.length > 0 && (
-                        <InlineDataChart
-                          type={inferChartType(message.content, message.queryData.data)}
+                          type={message.queryData.chartType ?? inferChartType(message.content, message.queryData.data)}
                           data={message.queryData.data}
                         />
                       )}

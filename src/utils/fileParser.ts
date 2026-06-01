@@ -24,6 +24,14 @@ export async function parseFile(file: File): Promise<ParsedFileData> {
     const text = await file.text();
     const parsed = JSON.parse(text);
     rows = Array.isArray(parsed) ? parsed : [parsed];
+  } else if (ext === 'jsonl' || ext === 'ndjson') {
+    // JSON Lines: one JSON object per line
+    const text = await file.text();
+    rows = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
   } else if (ext === 'xlsx' || ext === 'xls') {
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array' });

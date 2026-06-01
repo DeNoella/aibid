@@ -556,27 +556,25 @@ function buildFallbackChartData(
 export async function analyzeFileData(
   question: string,
   fileContext: { filename: string; rows: Record<string, unknown>[]; columns: string[] },
-  previousMessages?: ConversationMessage[]
+  // Intentionally unused: data computation is deterministic and must depend ONLY
+  // on the literal current question. Mixing in previous questions caused stale /
+  // wrong answers (e.g. a "clients" question picking up "revenue" from an earlier turn).
+  _previousMessages?: ConversationMessage[]
 ): Promise<{
   answer: string;
   data: Record<string, unknown>[];
   columns: string[];
   rowCount: number;
   fileData: Record<string, unknown>[];
+  chartType: 'bar' | 'line' | 'pie';
+  showChart: boolean;
+  primaryValue: number | null;
+  primaryLabel: string;
 }> {
   const { rows, columns } = fileContext;
 
-  // Enrich the question with context from previous turns so follow-ups work
-  let enrichedQuestion = question;
-  if (previousMessages?.length) {
-    const recent = previousMessages.slice(-4)
-      .filter(m => m.role === 'user')
-      .map(m => m.content.slice(0, 120))
-      .join(' | ');
-    if (recent) enrichedQuestion = `${question} (context: ${recent})`;
-  }
-
-  const result = runFileQuery(enrichedQuestion, rows, columns);
+  // Run the engine on the EXACT current question — no history, no caching.
+  const result = runFileQuery(question, rows, columns);
 
   return {
     answer: result.answer,
@@ -584,5 +582,9 @@ export async function analyzeFileData(
     columns: result.columns,
     rowCount: rows.length,
     fileData: rows,
+    chartType: result.chartType,
+    showChart: result.showChart,
+    primaryValue: result.primaryValue,
+    primaryLabel: result.primaryLabel,
   };
 }

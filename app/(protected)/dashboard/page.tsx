@@ -92,6 +92,8 @@ export default function DashboardPage() {
   const [voiceFocus, setVoiceFocus] = useState<VoiceMetricFocus>(null);
   const [loading, setLoading] = useState(true);
   const [analystLoading, setAnalystLoading] = useState(false);
+  // Per-card overrides driven by the latest dataset question (key -> {value, hint})
+  const [cardOverrides, setCardOverrides] = useState<Record<string, { value: string; hint: string }>>({});
 
   const fetchData = useCallback(async (range: DateRangePreset, cStart: string, cEnd: string) => {
     if (range === 'custom' && (!cStart || !cEnd)) return;
@@ -196,8 +198,51 @@ export default function DashboardPage() {
     if (action.action === 'reset') {
       setTimeRange('thismonth');
       setVoiceFocus(null);
+      setCardOverrides({});
     }
   };
+
+  // Map a dataset question to one of the four analyst cards and update it live.
+  const handleQueryResult = useCallback((result: {
+    question: string;
+    primaryValue?: number | null;
+    primaryLabel?: string;
+    rowCount: number;
+    data: Record<string, unknown>[];
+  }) => {
+    const q = result.question.toLowerCase();
+
+    // Which card does this question relate to?
+    const target =
+      /revenue|sales|income|arr|mrr|turnover|profit/.test(q) ? 'revenue'
+      : /client|customer|account|churn/.test(q) ? 'clients'
+      : /anomaly|risk|flag|issue|alert|outlier/.test(q) ? 'anomalies'
+      : /insight|report|recommendation|finding|analysis/.test(q) ? 'insights'
+      : null;
+    if (!target) return;
+
+    // Pick the headline number: engine's primaryValue, else sum the numeric column, else rowCount
+    let value = result.primaryValue ?? null;
+    if (value == null && result.data.length) {
+      const numericKey = Object.keys(result.data[0]).find(
+        (k) => typeof result.data[0][k] === 'number'
+      );
+      if (numericKey) {
+        value = result.data.reduce((s, r) => s + (Number(r[numericKey]) || 0), 0);
+      }
+    }
+    if (value == null) value = result.rowCount;
+
+    const formatted =
+      target === 'revenue'
+        ? (Math.abs(value) >= 1_000_000 ? `$${(value / 1_000_000).toFixed(2)}M` : `$${Math.round(value).toLocaleString()}`)
+        : Math.round(value).toLocaleString();
+
+    setCardOverrides((prev) => ({
+      ...prev,
+      [target]: { value: formatted, hint: 'from your dataset' },
+    }));
+  }, []);
 
   const displayedMetrics = voiceFocus
     ? metrics.filter((m) => metricCardMap[voiceFocus].includes(m.label))
@@ -264,8 +309,9 @@ export default function DashboardPage() {
           ) : (
             analystData?.kpis.map((kpi, index) => {
               const isPinned = pinnedKeys.has(kpi.key);
+              const override = cardOverrides[kpi.key];
               const content = (
-                <Card className="p-4 h-full hover:shadow-md transition-shadow">
+                <Card className={`p-4 h-full hover:shadow-md transition-shadow ${override ? 'ring-1 ring-brand/40' : ''}`}>
                   <div className="flex items-start justify-between mb-2">
                     <p className="text-sm text-muted-foreground">{kpi.label}</p>
                     <Button
@@ -280,17 +326,21 @@ export default function DashboardPage() {
                         : <PinOff className="w-4 h-4 text-muted-foreground" />}
                     </Button>
                   </div>
-                  <p className="text-2xl font-semibold text-foreground">{kpi.value}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    {kpi.change >= 0
-                      ? <TrendingUp className="w-3 h-3 text-green-600" />
-                      : <TrendingDown className="w-3 h-3 text-red-600" />}
-                    <span className={`text-xs ${kpi.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {kpi.change >= 0 ? '+' : ''}{kpi.change.toFixed(1)}%
-                    </span>
-                    <span className="text-xs text-muted-foreground">{kpi.changeLabel}</span>
-                  </div>
-                  {isPinned && <Badge variant="outline" className="mt-2 text-[10px]">Pinned</Badge>}
+                  <p className="text-2xl font-semibold text-foreground">{override ? override.value : kpi.value}</p>
+                  {override ? (
+                    <p className="text-xs text-brand mt-1">{override.hint}</p>
+                  ) : (
+                    <div className="flex items-center gap-1 mt-1">
+                      {kpi.change >= 0
+                        ? <TrendingUp className="w-3 h-3 text-green-600" />
+                        : <TrendingDown className="w-3 h-3 text-red-600" />}
+                      <span className={`text-xs ${kpi.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {kpi.change >= 0 ? '+' : ''}{kpi.change.toFixed(1)}%
+                      </span>
+                      <span className="text-xs text-muted-foreground">{kpi.changeLabel}</span>
+                    </div>
+                  )}
+                  {isPinned && !override && <Badge variant="outline" className="mt-2 text-[10px]">Pinned</Badge>}
                 </Card>
               );
               return kpi.link ? (
@@ -392,7 +442,7 @@ export default function DashboardPage() {
             Ask a question or upload a dataset — your answer will appear as a visualization below.
           </p>
         </div>
-        <VoiceControl onCommand={handleVoiceCommand} />
+        <VoiceControl onCommand={handleVoiceCommand} onResult={handleQueryResult} />
       </div>
     </div>
   );

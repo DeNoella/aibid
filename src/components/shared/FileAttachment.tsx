@@ -7,7 +7,7 @@ import { parseFile, type ParsedFileData } from '@/utils/fileParser';
 import { toast } from 'sonner';
 
 const MAX_SIZE_MB = 20;
-const ACCEPT = '.csv,.xlsx,.xls,.json';
+const ACCEPT = '.csv,.xlsx,.xls,.json,.jsonl,.ndjson';
 
 interface FileAttachmentChipProps {
   data: ParsedFileData;

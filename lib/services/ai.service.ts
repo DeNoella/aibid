@@ -36,14 +36,19 @@ export async function sendMessage(conversationId: string, content: string, organ
   db.prepare('INSERT INTO ai_messages (id, conversation_id, role, content) VALUES (?, ?, ?, ?)').run(userMsgId, conversationId, 'user', content);
 
   let responseContent: string;
-  let queryData: { answer: string; data: Record<string, unknown>[]; columns: string[]; rowCount: number; fileData?: Record<string, unknown>[] } | null = null;
+  let queryData: {
+    answer: string; data: Record<string, unknown>[]; columns: string[]; rowCount: number;
+    fileData?: Record<string, unknown>[];
+    chartType?: 'bar' | 'line' | 'pie'; showChart?: boolean;
+    primaryValue?: number | null; primaryLabel?: string;
+  } | null = null;
 
   if (fileContext?.rows?.length) {
     const result = await analyzeFileData(content, {
       filename: fileContext.filename,
       rows: fileContext.rows,
       columns: fileContext.columns ?? Object.keys(fileContext.rows[0] ?? {}),
-    }, previousMessages);
+    });
     responseContent = result.answer;
     queryData = result;
   } else if (isAIQueryAvailable()) {

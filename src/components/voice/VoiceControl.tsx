@@ -6,12 +6,12 @@ import { Card } from '@/components/ui/card';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { parseVoiceCommand, getCommandFeedback, isDashboardCommand, VoiceCommandAction } from '@/utils/voiceCommands';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/services/api';
 import { FileDropZone, FileAttachmentChip } from '@/components/shared/FileAttachment';
 import type { ParsedFileData } from '@/utils/fileParser';
-import { InlineDataChart, inferChartType } from '@/components/shared/InlineDataChart';
+import { InlineDataChart } from '@/components/shared/InlineDataChart';
 
 interface QueryResult {
   question: string;
@@ -20,10 +20,16 @@ interface QueryResult {
   columns: string[];
   rowCount: number;
   fileData?: Record<string, unknown>[];
+  chartType?: 'bar' | 'line' | 'pie';
+  showChart?: boolean;
+  primaryValue?: number | null;
+  primaryLabel?: string;
 }
 
 interface VoiceControlProps {
   onCommand: (action: VoiceCommandAction) => void;
+  /** Bubbles each query result up so the dashboard cards can react to the data */
+  onResult?: (result: QueryResult) => void;
 }
 
 type VoiceMetricFocus = 'revenue' | 'campaigns' | 'clicks' | 'conversion' | 'impressions';
@@ -81,20 +87,40 @@ const inferMetricFocus = (text: string): VoiceMetricFocus | null => {
   return null;
 };
 
-export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
+export const VoiceControl = ({ onCommand, onResult }: VoiceControlProps) => {
   const [lastCommand, setLastCommand] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
   const [querying, setQuerying] = useState(false);
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [attachedFile, setAttachedFile] = useState<ParsedFileData | null>(null);
 
+  // Refs keep the voice callback reading the LATEST values, never a stale closure.
+  // This is what guarantees every new question uses the currently-loaded dataset.
+  const attachedFileRef = useRef<ParsedFileData | null>(null);
+  const onResultRef = useRef(onResult);
+  useEffect(() => { attachedFileRef.current = attachedFile; }, [attachedFile]);
+  useEffect(() => { onResultRef.current = onResult; }, [onResult]);
+
+  const setFile = (file: ParsedFileData | null) => {
+    // Replacing the dataset clears any previous answer so nothing carries over.
+    setAttachedFile(file);
+    attachedFileRef.current = file;
+    setQueryResult(null);
+  };
+
   const handleVoiceResult = useCallback(async (result: { transcript: string; isFinal: boolean }) => {
     if (!result.isFinal) return;
 
-    const transcript = result.transcript;
+    const transcript = result.transcript.trim();
+    if (!transcript) return;
     setLastCommand(transcript);
 
-    if (isDashboardCommand(transcript)) {
+    // When a dataset is loaded, every spoken phrase is a QUESTION about that data —
+    // never a dashboard command. This stops words like "revenue", "month" or "show"
+    // from hijacking the query and lets any natural question reach the engine.
+    const hasFile = !!attachedFileRef.current;
+
+    if (!hasFile && isDashboardCommand(transcript)) {
       const action = parseVoiceCommand(transcript);
       const commandMetric = action.metric || (action.filter as VoiceMetricFocus | undefined);
       if (commandMetric) {
@@ -108,6 +134,9 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
       setTimeout(() => setFeedback(''), 5000);
     } else {
       setFeedback('');
+      // Clear the previous answer immediately so a new question never shows stale output
+      setQueryResult(null);
+
       const transcriptFocus = inferMetricFocus(transcript);
       if (transcriptFocus) {
         onCommand({ metric: transcriptFocus, action: 'show' });
@@ -118,34 +147,31 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
       setQuerying(true);
       toast.info('Processing your question…', { description: `"${transcript}"` });
 
+      // Read the CURRENT file from the ref — always fresh, never stale.
+      const currentFile = attachedFileRef.current;
+
       try {
         const payload: Record<string, unknown> = { question: transcript };
-        if (attachedFile) {
+        if (currentFile) {
           payload.fileContext = {
-            filename: attachedFile.filename,
-            columns: attachedFile.columns,
-            rows: attachedFile.rows,
-            systemNote: 'The user has uploaded a file. Use this data to answer the query and generate visualizations.',
+            filename: currentFile.filename,
+            columns: currentFile.columns,
+            rows: currentFile.rows,
           };
         }
         const data = await api.post<QueryResult>('/ai/query', payload);
-        if (attachedFile) {
-          data.fileData = attachedFile.rows;
-        }
+        data.question = transcript;
+        if (currentFile) data.fileData = currentFile.rows;
         setQueryResult(data);
 
-        // Keep the file loaded — user can ask follow-up questions without re-uploading.
-        // They can remove it manually with the chip's ✕ button.
+        // Bubble result up so the dashboard cards can react
+        onResultRef.current?.(data);
 
-        // Announce result
         speak("Recorded. Here's what you asked for.");
 
         if (!transcriptFocus) {
-          const resultText = `${data.answer} ${data.columns.join(' ')}`;
-          const resultFocus = inferMetricFocus(resultText);
-          if (resultFocus) {
-            onCommand({ metric: resultFocus, action: 'show' });
-          }
+          const resultFocus = inferMetricFocus(`${data.answer} ${data.columns.join(' ')}`);
+          if (resultFocus) onCommand({ metric: resultFocus, action: 'show' });
         }
 
         toast.success(`Found ${data.rowCount} result${data.rowCount !== 1 ? 's' : ''}`);
@@ -156,7 +182,7 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
         setQuerying(false);
       }
     }
-  }, [attachedFile, onCommand]);
+  }, [onCommand]);
 
   const {
     isListening,
@@ -216,11 +242,11 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
       {/* Show file chip when a file is loaded; drop zone only when no file is active */}
       {attachedFile ? (
         <div className="flex items-center justify-between gap-2 p-3 rounded-lg border border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-800/40">
-          <FileAttachmentChip data={attachedFile} onRemove={() => setAttachedFile(null)} />
+          <FileAttachmentChip data={attachedFile} onRemove={() => setFile(null)} />
           <span className="text-xs text-muted-foreground">Ask as many questions as you need — file stays loaded.</span>
         </div>
       ) : (
-        <FileDropZone onAttach={setAttachedFile} />
+        <FileDropZone onAttach={setFile} />
       )}
 
       <Card className="p-4">
@@ -313,18 +339,13 @@ export const VoiceControl = ({ onCommand }: VoiceControlProps) => {
                 </Button>
               </div>
 
-              <p className="text-sm text-foreground font-medium mb-3">{queryResult.answer}</p>
+              <p className="text-sm text-foreground font-medium mb-3 whitespace-pre-wrap">{queryResult.answer}</p>
 
-              {/* Always show chart when there's data — for both file data and database query results */}
-              {queryResult.fileData && queryResult.fileData.length > 0 && (
+              {/* Chart is built from the AGGREGATED result (clean label/value pairs),
+                  never from raw rows — and only when a visual actually helps. */}
+              {queryResult.showChart && queryResult.data.length >= 2 && (
                 <InlineDataChart
-                  type={inferChartType(queryResult.question, queryResult.fileData)}
-                  data={queryResult.fileData}
-                />
-              )}
-              {!queryResult.fileData && queryResult.data.length > 0 && (
-                <InlineDataChart
-                  type={inferChartType(queryResult.question, queryResult.data)}
+                  type={queryResult.chartType ?? 'bar'}
                   data={queryResult.data}
                 />
               )}
