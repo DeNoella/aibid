@@ -1,0 +1,27 @@
+@startuml current-system-model
+!include theme.puml
+title Current System Model — Traditional Manual Analytics & Reporting
+
+|#FDEEDF|Business Staff|
+start
+:Pull figures manually from\nseparate tools and emails;
+:Type records into\nExcel spreadsheets;
+
+|#E8F1FB|Data Analyst|
+:Merge many spreadsheets\nby hand;
+:Clean and fix errors\nmanually;
+:Build charts and pivot\ntables one by one;
+:Email a static report\n(PDF / slides);
+
+|#E7F6EE|Management|
+:Read emailed / printed\nreport;
+if (Numbers clear and\nup to date?) then (yes)
+  :Make decision based on\npast (often outdated) data;
+  stop
+else (no)
+  :Send questions back\nby email (days lost);
+  :Wait for the analyst\nto redo the report;
+  stop
+endif
+
+@enduml

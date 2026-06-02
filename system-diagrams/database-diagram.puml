@@ -1,0 +1,169 @@
+@startuml database-diagram
+!include theme.puml
+!pragma layout smetana
+title Database Diagram (ERD) — AIBID SQLite Schema
+
+hide circle
+skinparam linetype ortho
+
+entity "organizations" as organizations {
+  * id : TEXT <<PK>>
+  --
+  name : TEXT
+  industry : TEXT
+  size : TEXT
+}
+
+entity "users" as users {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  email : TEXT
+  password_hash : TEXT
+  role : TEXT
+  subscription_status : TEXT
+}
+
+entity "sessions" as sessions {
+  * id : TEXT <<PK>>
+  --
+  # user_id : TEXT <<FK>>
+  token : TEXT
+  expires_at : TEXT
+}
+
+entity "companies" as companies {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  name : TEXT
+  industry : TEXT
+}
+
+entity "contacts" as contacts {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  # company_id : TEXT <<FK>>
+  first_name : TEXT
+  lifecycle_stage : TEXT
+}
+
+entity "pipeline_stages" as stages {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  name : TEXT
+  probability : REAL
+}
+
+entity "deals" as deals {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  # contact_id : TEXT <<FK>>
+  # stage_id : TEXT <<FK>>
+  # owner_id : TEXT <<FK>>
+  value : REAL
+}
+
+entity "activities" as activities {
+  * id : TEXT <<PK>>
+  --
+  # contact_id : TEXT <<FK>>
+  # deal_id : TEXT <<FK>>
+  # user_id : TEXT <<FK>>
+  type : TEXT
+}
+
+entity "campaigns" as campaigns {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  name : TEXT
+  status : TEXT
+}
+
+entity "campaign_metrics" as metrics {
+  * id : TEXT <<PK>>
+  --
+  # campaign_id : TEXT <<FK>>
+  impressions : INTEGER
+  revenue : REAL
+}
+
+entity "ai_conversations" as conv {
+  * id : TEXT <<PK>>
+  --
+  # user_id : TEXT <<FK>>
+  title : TEXT
+}
+
+entity "ai_messages" as msg {
+  * id : TEXT <<PK>>
+  --
+  # conversation_id : TEXT <<FK>>
+  role : TEXT
+  content : TEXT
+}
+
+entity "ai_insights" as insights {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  type : TEXT
+  confidence : REAL
+}
+
+entity "data_sources" as datasources {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  type : TEXT
+  status : TEXT
+}
+
+entity "reports" as reports {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  title : TEXT
+  status : TEXT
+}
+
+entity "audit_logs" as audit {
+  * id : TEXT <<PK>>
+  --
+  # organization_id : TEXT <<FK>>
+  # user_id : TEXT <<FK>>
+  action : TEXT
+}
+
+' ---- Relationships (crow's foot) ----
+organizations ||--o{ users
+organizations ||--o{ companies
+organizations ||--o{ contacts
+organizations ||--o{ stages
+organizations ||--o{ deals
+organizations ||--o{ campaigns
+organizations ||--o{ insights
+organizations ||--o{ datasources
+organizations ||--o{ reports
+organizations ||--o{ audit
+
+users ||--o{ sessions
+users ||--o{ deals
+users ||--o{ activities
+users ||--o{ conv
+users ||--o{ audit
+
+companies ||--o{ contacts
+companies ||--o{ deals
+contacts ||--o{ deals
+stages  ||--o{ deals
+contacts ||--o{ activities
+deals ||--o{ activities
+campaigns ||--o{ metrics
+conv ||--o{ msg
+
+@enduml

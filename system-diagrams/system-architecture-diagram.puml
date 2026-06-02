@@ -1,0 +1,55 @@
+@startuml system-architecture-diagram
+!include theme.puml
+!pragma layout smetana
+left to right direction
+title System Architecture Diagram — AIBID Platform
+
+actor "Analyst /\nAdministrator" as user #FDEEDF
+
+package "Presentation Layer" #F8FAFC {
+  rectangle "Web Browser" as browser
+  rectangle "React + Next.js UI\n(Tailwind, Recharts,\nVoice Control)" as ui
+}
+
+package "Application Layer (Next.js API Routes)" #F8FAFC {
+  rectangle "JWT Auth +\nRole Middleware" as auth #FDEEDF
+  package "Business Logic (Services)" #FFFFFF {
+    rectangle "Auth &\nUser Service" as svcAuth
+    rectangle "Dashboard &\nAnalytics" as svcDash
+    rectangle "AI Query Engine\n& Assistant" as svcAI #F1EAFB
+    rectangle "Insights\nValidation" as svcIns #F1EAFB
+    rectangle "Reports\nService" as svcRep
+    rectangle "Data Sources\n& CRM" as svcData
+  }
+}
+
+package "Data Layer" #F8FAFC {
+  database "SQLite Database\n(better-sqlite3)" as db
+}
+
+package "External Services" #F8FAFC {
+  rectangle "AI Provider\n(Claude / OpenAI)" as llm #F1EAFB
+  rectangle "SMTP Email\n(Nodemailer)" as smtp
+}
+
+user --> browser
+browser --> ui : HTTPS
+ui --> auth : REST API calls
+auth --> svcAuth
+auth --> svcDash
+auth --> svcAI
+auth --> svcIns
+auth --> svcRep
+auth --> svcData
+
+svcAuth --> db
+svcDash --> db
+svcAI --> db
+svcIns --> db
+svcRep --> db
+svcData --> db
+
+svcAI ..> llm : optional NL queries
+svcAuth ..> smtp : notifications / MFA
+
+@enduml

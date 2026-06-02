@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p system-diagrams)",
+      "Bash(java -jar system-diagrams/plantuml.jar -version)"
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+' ============================================================
+' Shared AIBID diagram theme — white background, soft colours
+' Consistent across all six system diagrams
+' ============================================================
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam roundCorner 14
+skinparam dpi 150
+skinparam Padding 4
+skinparam ArrowColor #64748B
+skinparam ArrowFontColor #334155
+skinparam ArrowThickness 1.2
+
+' ---- Soft palette ----
+' Blue   : fill #E8F1FB  line #2563EB
+' Green  : fill #E7F6EE  line #16A34A
+' Orange : fill #FDEEDF  line #EA8A3E
+' Purple : fill #F1EAFB  line #7C3AED
+' Grey   : fill #F3F4F6  line #94A3B8
+
+skinparam rectangle {
+  BackgroundColor #E8F1FB
+  BorderColor #2563EB
+  FontColor #0F172A
+  BorderThickness 1.3
+}
+
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #CBD5E1
+  FontColor #1E293B
+  FontStyle bold
+}
+
+skinparam node {
+  BackgroundColor #FDEEDF
+  BorderColor #EA8A3E
+  FontColor #0F172A
+}
+
+skinparam database {
+  BackgroundColor #E7F6EE
+  BorderColor #16A34A
+  FontColor #0F172A
+}
+
+skinparam actor {
+  BackgroundColor #FDEEDF
+  BorderColor #EA8A3E
+  FontColor #0F172A
+}
+
+skinparam usecase {
+  BackgroundColor #E8F1FB
+  BorderColor #2563EB
+  FontColor #0F172A
+  BorderThickness 1.2
+}
+
+skinparam class {
+  BackgroundColor #E8F1FB
+  BorderColor #2563EB
+  FontColor #0F172A
+  AttributeFontColor #334155
+  HeaderBackgroundColor #D6E6FB
+  BorderThickness 1.2
+}
+
+skinparam sequence {
+  ArrowColor #64748B
+  LifeLineBorderColor #94A3B8
+  LifeLineBackgroundColor #F1F5F9
+  ParticipantBackgroundColor #E8F1FB
+  ParticipantBorderColor #2563EB
+  ParticipantFontColor #0F172A
+  ActorBackgroundColor #FDEEDF
+  ActorBorderColor #EA8A3E
+  BoxBackgroundColor #F8FAFC
+  BoxBorderColor #CBD5E1
+}

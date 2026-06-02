@@ -1,0 +1,55 @@
+@startuml use-case-diagram
+!include theme.puml
+!pragma layout smetana
+left to right direction
+title Use Case Diagram — AIBID Platform
+
+actor "Data Analyst" as analyst
+actor "Administrator" as admin
+actor "AI Engine" as ai #E7F6EE
+
+rectangle "AIBID — AI Business Intelligence Platform" {
+
+  usecase "Log in\n(JWT + MFA)" as UC_login
+  usecase "View Real-time\nDashboard" as UC_dash
+  usecase "Ask AI Assistant" as UC_ai
+  usecase "Use Voice Query" as UC_voice
+  usecase "Upload & Analyse\nDataset" as UC_upload
+  usecase "Validate AI\nInsights" as UC_validate
+  usecase "Generate &\nExport Reports" as UC_reports
+  usecase "Manage Contacts,\nDeals & Campaigns" as UC_crm
+
+  usecase "Manage Users\n& Roles" as UC_users
+  usecase "Configure\nData Sources" as UC_ds
+  usecase "View Audit Logs" as UC_audit
+  usecase "Monitor AI\nModel Health" as UC_health
+
+  usecase "Generate Insights\n& Visualisations" as UC_gen
+}
+
+' ---- Analyst ----
+analyst --> UC_login
+analyst --> UC_dash
+analyst --> UC_ai
+analyst --> UC_voice
+analyst --> UC_upload
+analyst --> UC_validate
+analyst --> UC_reports
+analyst --> UC_crm
+
+' ---- Administrator (also has analyst rights) ----
+admin --> UC_login
+admin --> UC_users
+admin --> UC_ds
+admin --> UC_audit
+admin --> UC_health
+admin --> UC_dash
+
+' ---- Shared / system behaviour ----
+UC_ai ..> UC_gen : <<include>>
+UC_voice ..> UC_gen : <<include>>
+UC_upload ..> UC_gen : <<include>>
+UC_gen <-- ai
+UC_validate <-- ai
+
+@enduml

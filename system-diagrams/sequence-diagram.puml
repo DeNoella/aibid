@@ -1,0 +1,47 @@
+@startuml sequence-diagram
+!include theme.puml
+title Sequence Diagram — Ask a Data Question (Voice / AI Assistant)
+
+actor "Data Analyst" as User
+participant "Web UI\n(React + Next.js)" as UI
+participant "API Route\n/api/ai/query" as API
+participant "Auth Middleware\n(JWT)" as Auth
+participant "AI Service /\nQuery Engine" as Engine
+database "SQLite\nDatabase" as DB
+
+User -> UI : Upload dataset & ask question\n(typed or by voice)
+activate UI
+
+UI -> API : POST question + file data
+activate API
+
+API -> Auth : Verify JWT & role
+activate Auth
+Auth --> API : Authorised user
+deactivate Auth
+
+alt Question about uploaded file
+  API -> Engine : analyzeFileData(question, rows)
+  activate Engine
+  Engine -> Engine : Detect intent, compute\nstats & choose chart type
+  Engine --> API : answer + table + chart data
+  deactivate Engine
+else Question about CRM data
+  API -> Engine : askQuestion(question)
+  activate Engine
+  Engine -> DB : Run safe SQL query
+  activate DB
+  DB --> Engine : Result rows
+  deactivate DB
+  Engine --> API : answer + table + chart data
+  deactivate Engine
+end
+
+API --> UI : JSON result\n(answer, chartType, data)
+deactivate API
+
+UI -> UI : Render answer, table & chart;\nupdate dashboard KPI cards
+UI --> User : Spoken + visual answer
+deactivate UI
+
+@enduml

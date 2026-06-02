@@ -66,7 +66,8 @@
   --secondary: #21262d;
   --secondary-foreground: #ffffff;
   --muted: #21262d;
-  --muted-foreground: #8b949e;
+  /* Brighter secondary text so descriptive/muted words stay readable in dark mode */
+  --muted-foreground: #aeb9c4;
   --accent: #21262d;
   --accent-foreground: #ffffff;
   --brand: #f0883e;
