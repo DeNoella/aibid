@@ -278,16 +278,16 @@ export default function AIAssistantPage() {
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-muted border-b border-border">
-                {queryData.columns.map((col) => (
-                  <th key={col} className="px-3 py-2 text-left font-medium text-foreground whitespace-nowrap">{col}</th>
+                {queryData.columns.map((col, colIdx) => (
+                  <th key={`${colIdx}-${col}`} className="px-3 py-2 text-left font-medium text-foreground whitespace-nowrap">{col}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {displayRows.map((row, i) => (
                 <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/40">
-                  {queryData.columns.map((col) => (
-                    <td key={col} className="px-3 py-2 text-foreground/90 whitespace-nowrap max-w-[250px] truncate">
+                  {queryData.columns.map((col, colIdx) => (
+                    <td key={`${colIdx}-${col}`} className="px-3 py-2 text-foreground/90 whitespace-nowrap max-w-[250px] truncate">
                       {String(row[col] ?? '-')}
                     </td>
                   ))}

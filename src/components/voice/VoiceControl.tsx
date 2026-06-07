@@ -356,16 +356,16 @@ export const VoiceControl = ({ onCommand, onResult }: VoiceControlProps) => {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-muted border-b border-border">
-                          {queryResult.columns.map((col) => (
-                            <th key={col} className="px-3 py-2 text-left font-medium text-foreground whitespace-nowrap">{col}</th>
+                          {queryResult.columns.map((col, colIdx) => (
+                            <th key={`${colIdx}-${col}`} className="px-3 py-2 text-left font-medium text-foreground whitespace-nowrap">{col}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {queryResult.data.slice(0, 10).map((row, i) => (
                           <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/40">
-                            {queryResult.columns.map((col) => (
-                              <td key={col} className="px-3 py-2 text-foreground/90 whitespace-nowrap max-w-[250px] truncate">
+                            {queryResult.columns.map((col, colIdx) => (
+                              <td key={`${colIdx}-${col}`} className="px-3 py-2 text-foreground/90 whitespace-nowrap max-w-[250px] truncate">
                                 {String(row[col] ?? '-')}
                               </td>
                             ))}

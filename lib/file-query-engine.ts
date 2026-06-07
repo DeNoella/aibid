@@ -170,6 +170,31 @@ function fmt(n: number, col = ''): string {
 
 const label = (col: string) => col.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+function uniqueCols(cols: string[]): string[] {
+  const seen = new Set<string>();
+  return cols.filter((c) => {
+    if (!c || seen.has(c)) return false;
+    seen.add(c);
+    return true;
+  });
+}
+
+function tableFromCols(rows: Row[], cols: string[], limit?: number): { data: Row[]; columns: string[] } {
+  const keys = uniqueCols(cols);
+  const seenLabels = new Map<string, number>();
+  const displayColumns = keys.map((col) => {
+    const base = label(col);
+    const n = seenLabels.get(base) ?? 0;
+    seenLabels.set(base, n + 1);
+    return n === 0 ? base : `${base} (${n + 1})`;
+  });
+  const slice = limit != null ? rows.slice(0, limit) : rows;
+  const data = slice.map((row) =>
+    Object.fromEntries(keys.map((k, i) => [displayColumns[i], row[k]]))
+  );
+  return { data, columns: displayColumns };
+}
+
 // Decide chart type from the question + the grouping column
 function decideChart(question: string, groupCol: string | null, categoryCount: number): 'bar' | 'line' | 'pie' {
   const q = question.toLowerCase();
@@ -373,10 +398,11 @@ export function runFileQuery(rawQuestion: string, rows: Row[], columns: string[]
         dir === 'above' ? numVal(r[filterCol]) > threshold : numVal(r[filterCol]) < threshold);
       const nameCol = columns.find(c => /name|title/i.test(c)) || catCols[0];
       const showCols = [nameCol, filterCol, ...catCols.slice(0, 1)].filter(Boolean) as string[];
+      const { data, columns: displayColumns } = tableFromCols(filtered, showCols, 15);
       return {
         answer: `Found **${filtered.length}** records where ${label(filterCol)} is ${dir} ${fmt(threshold, filterCol)} (of ${rows.length} total).`,
-        data: filtered.slice(0, 15).map(r => Object.fromEntries(showCols.map(c => [label(c), r[c]]))),
-        columns: showCols.map(label),
+        data,
+        columns: displayColumns,
         chartType: 'bar', showChart: false, primaryValue: filtered.length, primaryLabel: 'Matching records',
       };
     }
@@ -390,10 +416,11 @@ export function runFileQuery(rawQuestion: string, rows: Row[], columns: string[]
       const filtered = rows.filter(r => String(r[catCol]) === matched);
       const nameCol = columns.find(c => /name|title/i.test(c)) || catCols[0];
       const showCols = [nameCol, catCol, ...numCols.slice(0, 2)].filter(Boolean) as string[];
+      const { data, columns: displayColumns } = tableFromCols(filtered, showCols, 15);
       return {
         answer: `Found **${filtered.length}** records where ${label(catCol)} = **${matched}**.`,
-        data: filtered.slice(0, 15).map(r => Object.fromEntries(showCols.map(c => [label(c), r[c]]))),
-        columns: showCols.map(label),
+        data,
+        columns: displayColumns,
         chartType: 'bar', showChart: false, primaryValue: filtered.length, primaryLabel: `${matched} count`,
       };
     }
@@ -419,10 +446,11 @@ export function runFileQuery(rawQuestion: string, rows: Row[], columns: string[]
 
   const showCols = [columns.find(c => /name|title/i.test(c)), ...catCols.slice(0, 2), ...numCols.slice(0, 2)]
     .filter(Boolean) as string[];
+  const { data, columns: displayColumns } = tableFromCols(rows, showCols, 10);
   return {
     answer: `Here are the first ${Math.min(rows.length, 10)} records from your dataset:`,
-    data: rows.slice(0, 10).map(r => Object.fromEntries(showCols.map(c => [label(c), r[c]]))),
-    columns: showCols.map(label),
+    data,
+    columns: displayColumns,
     chartType: 'bar', showChart: false, primaryValue: rows.length, primaryLabel: 'Total records',
   };
 }
