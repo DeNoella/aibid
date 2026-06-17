@@ -27,35 +27,35 @@ export class EmailService {
     body {
       margin: 0;
       padding: 24px;
-      background-color: #0d1117;
-      color: #ffffff;
+      background-color: #f5f3ee;
+      color: #1a1a1a;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
     .card {
       max-width: 520px;
       margin: 0 auto;
-      background: #161b22;
-      border: 1px solid #30363d;
+      background: #ffffff;
+      border: 1px solid #e8e5df;
       border-radius: 16px;
       overflow: hidden;
     }
     .header {
       padding: 28px 24px 20px;
       text-align: center;
-      border-bottom: 1px solid #30363d;
-      background: #0d1117;
+      border-bottom: 1px solid #e8e5df;
+      background: #ffffff;
     }
     .logo {
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 28px;
       font-weight: 700;
-      color: #ffffff;
+      color: #1a1a1a;
       letter-spacing: 0.04em;
       margin: 0 0 6px 0;
     }
     .tagline {
       margin: 0;
-      color: #8b949e;
+      color: #6b6860;
       font-size: 13px;
     }
     .content {
@@ -67,11 +67,11 @@ export class EmailService {
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 24px;
       font-weight: 700;
-      color: #ffffff;
+      color: #1a1a1a;
     }
     .text {
       margin: 0 0 24px 0;
-      color: #8b949e;
+      color: #6b6860;
       font-size: 15px;
       line-height: 1.6;
     }
@@ -79,25 +79,25 @@ export class EmailService {
       display: inline-block;
       padding: 12px 28px;
       border-radius: 10px;
-      background: #f0883e;
-      color: #0d1117 !important;
+      background: #1a6b5a;
+      color: #ffffff !important;
       text-decoration: none;
       font-weight: 600;
       font-size: 15px;
     }
     .meta {
-      color: #8b949e;
+      color: #9c9890;
       font-size: 13px;
       margin-top: 20px;
       line-height: 1.6;
     }
     .footer {
       font-size: 12px;
-      color: #8b949e;
+      color: #9c9890;
       padding: 16px 24px;
       text-align: center;
-      border-top: 1px solid #30363d;
-      background: #0d1117;
+      border-top: 1px solid #e8e5df;
+      background: #f5f3ee;
     }
   </style>
 </head>
